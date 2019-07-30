@@ -1,9 +1,16 @@
 :host {
-
+  contain: content;
+  display: block;
 }
 
 :host *,
 :host *:before,
 :host *:after {
   box-sizing: border-box;
+}
+
+:host canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
