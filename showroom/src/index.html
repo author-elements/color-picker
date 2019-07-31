@@ -46,7 +46,23 @@
           </select>
         </author-control>
 
-        <author-color-picker></author-color-picker>
+        <div class="picker">
+          <div class="swatches">
+            <div class="swatch">
+              <div class="label">Preview:</div>
+              <div class="color preview"></div>
+            </div>
+
+            <div class="swatch">
+              <div class="label">Selected:</div>
+              <div class="selected color"></div>
+            </div>
+          </div>
+
+          <author-color-picker>
+            <div class="target"></div>
+          </author-color-picker>
+        </div>
       </div>
     </main>
   </body>

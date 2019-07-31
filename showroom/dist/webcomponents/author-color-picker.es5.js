@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
 // @author.io/element-color-picker v1.0.0 available at github.com/author-elements/color-picker
-// Last Build: 7/29/2019, 8:01:57 PM
+// Last Build: 7/30/2019, 9:37:25 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -103,7 +103,7 @@ var AuthorColorPickerElement = (function () {
 
       _classCallCheck(this, AuthorColorPickerElement);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AuthorColorPickerElement).call(this, "<template><style>@charset \"UTF-8\"; :host{contain:content;display:block}:host *,:host :after,:host :before{box-sizing:border-box}:host canvas{display:block;width:100%;height:100%}author-color-picker{contain:content;display:block}author-color-picker *,author-color-picker :after,author-color-picker :before{box-sizing:border-box}author-color-picker canvas{display:block;width:100%;height:100%}</style><canvas></canvas></template>"));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AuthorColorPickerElement).call(this, "<template><style>@charset \"UTF-8\"; :host{contain:content;display:block}:host *,:host :after,:host :before{box-sizing:border-box}:host .wrapper{position:relative}:host canvas{display:block;width:100%;height:100%}:host ::slotted(*){position:absolute;z-index:1}author-color-picker{contain:content;display:block}author-color-picker *,author-color-picker :after,author-color-picker :before{box-sizing:border-box}author-color-picker .wrapper{position:relative}author-color-picker canvas{display:block;width:100%;height:100%}author-color-picker *{position:absolute;z-index:1}</style><div class=\"wrapper\"><slot></slot><div><canvas></canvas></div></div></template>"));
 
       _this.UTIL.defineProperties({
         canvas: {
@@ -120,7 +120,14 @@ var AuthorColorPickerElement = (function () {
             return _this.PRIVATE.canvas.getContext('2d');
           }
         },
-        coords: {
+        position: {
+          private: true,
+          default: {
+            x: 0,
+            y: 0
+          }
+        },
+        dimensions: {
           private: true,
           readonly: true,
           get: function get() {
@@ -137,10 +144,27 @@ var AuthorColorPickerElement = (function () {
         },
         currentColor: {
           private: true,
-          default: null
+          default: {
+            r: 255,
+            g: 255,
+            b: 255
+          }
         },
         selectedColor: {
-          default: null
+          private: true,
+          default: {
+            r: 255,
+            g: 255,
+            b: 255
+          }
+        },
+        previousColor: {
+          private: true,
+          default: {
+            r: 255,
+            g: 255,
+            b: 255
+          }
         }
       });
 
@@ -171,40 +195,208 @@ var AuthorColorPickerElement = (function () {
           gradient.y.addColorStop(4 / 4, 'black');
           context.fillStyle = gradient.y;
           context.fillRect(0, 0, width, height);
+        },
+        generateColorObj: function generateColorObj(_ref) {
+          var r = _ref.r,
+              g = _ref.g,
+              b = _ref.b;
+
+          var hsl = _this.PRIVATE.RGBToHSL({
+            r: r,
+            g: g,
+            b: b
+          });
+
+          var hue = hsl[0];
+          var saturation = hsl[1];
+          var lightness = hsl[2];
+          return {
+            red: r,
+            green: g,
+            blue: b,
+            hex: "#".concat(_this.PRIVATE.RGBToHex({
+              r: r,
+              g: g,
+              b: b
+            })),
+            rgb: "rgb(".concat(r, ",").concat(g, ",").concat(b, ")"),
+            hsl: "hsl(".concat(hue, ",").concat(saturation * 100, "%, ").concat(lightness * 100, "%)"),
+            hue: hue,
+            saturation: saturation,
+            lightness: lightness
+          };
+        },
+        unitToHex: function unitToHex(unit) {
+          var hex = Number(unit).toString(16);
+
+          if (hex.length < 2) {
+            hex = "0".concat(hex);
+          }
+
+          return hex.toUpperCase();
+        },
+        RGBToHex: function RGBToHex(_ref2) {
+          var _ref2$r = _ref2.r,
+              r = _ref2$r === void 0 ? 255 : _ref2$r,
+              _ref2$g = _ref2.g,
+              g = _ref2$g === void 0 ? 255 : _ref2$g,
+              _ref2$b = _ref2.b,
+              b = _ref2$b === void 0 ? 255 : _ref2$b;
+          var unitToHex = _this.PRIVATE.unitToHex;
+          return "".concat(unitToHex(r)).concat(unitToHex(g)).concat(unitToHex(b));
+        },
+        RGBToHSL: function RGBToHSL(_ref3) {
+          var r = _ref3.r,
+              g = _ref3.g,
+              b = _ref3.b;
+          r /= 255, g /= 255, b /= 255;
+          var min = Math.min(r, g, b);
+          var max = Math.max(r, g, b);
+          var difference = max - min;
+          var hue, saturation;
+
+          switch (max) {
+            case min:
+              hue = 0;
+              saturation = 0;
+              break;
+
+            case r:
+              hue = (g - b) / difference;
+              break;
+
+            case g:
+              hue = 2 + (b - r) / difference;
+              break;
+
+            case b:
+              hue = 4 + (r - g) / difference;
+              break;
+          }
+
+          hue = Math.min(hue * 60, 360);
+
+          if (hue < 0) {
+            hue += 360;
+          }
+
+          var lightness = (min + max) / 2;
+
+          if (lightness <= 0.5) {
+            saturation = difference / (max + min);
+          } else {
+            saturation = difference / (2 - max - min);
+          }
+
+          return [hue, saturation, lightness];
+        },
+        pointermoveHandler: function pointermoveHandler(evt) {
+          if (evt.buttons < 1) {
+            return;
+          }
+
+          var _this$PRIVATE$dimensi = _this.PRIVATE.dimensions,
+              top = _this$PRIVATE$dimensi.top,
+              left = _this$PRIVATE$dimensi.left,
+              width = _this$PRIVATE$dimensi.width,
+              height = _this$PRIVATE$dimensi.height;
+
+          var relative = _this.PRIVATE.getRelativePosition(evt);
+
+          if (relative.x !== _this.position.x.px || relative.y !== _this.position.y.px) {
+            _this.PRIVATE.currentColor = _this.PRIVATE.getColor(relative);
+            _this.PRIVATE.position = relative;
+
+            _this.emit('sample', {
+              color: _this.PRIVATE.generateColorObj(_this.PRIVATE.currentColor),
+              position: _this.position
+            });
+
+            document.addEventListener('pointerup', _this.PRIVATE.pointerupHandler);
+          }
+        },
+        getColor: function getColor(_ref4) {
+          var x = _ref4.x,
+              y = _ref4.y;
+
+          var _this$PRIVATE$context = _this.PRIVATE.context.getImageData(x, y, 1, 1),
+              data = _this$PRIVATE$context.data;
+
+          return {
+            r: data[0],
+            g: data[1],
+            b: data[2]
+          };
+        },
+        pointerupHandler: function pointerupHandler(evt) {
+          var _this$PRIVATE2 = _this.PRIVATE,
+              currentColor = _this$PRIVATE2.currentColor,
+              pointermoveHandler = _this$PRIVATE2.pointermoveHandler,
+              pointerupHandler = _this$PRIVATE2.pointerupHandler;
+          _this.PRIVATE.previousColor = _this.PRIVATE.selectedColor;
+          _this.PRIVATE.selectedColor = currentColor;
+
+          _this.emit('change', {
+            previous: _this.previousColor,
+            color: _this.selectedColor,
+            position: _this.position
+          });
+
+          document.removeEventListener('pointermove', pointermoveHandler);
+          document.removeEventListener('pointerup', pointerupHandler);
+        },
+        getRelativePosition: function getRelativePosition(evt) {
+          var _this$PRIVATE$dimensi2 = _this.PRIVATE.dimensions,
+              top = _this$PRIVATE$dimensi2.top,
+              left = _this$PRIVATE$dimensi2.left,
+              width = _this$PRIVATE$dimensi2.width,
+              height = _this$PRIVATE$dimensi2.height;
+          return {
+            x: Math.min(Math.max(evt.pageX - left, 0), width - .1),
+            y: Math.min(Math.max(evt.pageY - top, 0), height)
+          };
         }
       });
 
       _this.UTIL.registerListeners(_assertThisInitialized(_this), {
         connected: function connected() {
-          var _this$PRIVATE2 = _this.PRIVATE,
-              coords = _this$PRIVATE2.coords,
-              draw = _this$PRIVATE2.draw;
-          _this.PRIVATE.initialWidth = coords.width;
-          _this.PRIVATE.initialHeight = coords.height;
-          draw(coords.width, coords.height);
+          var _this$PRIVATE3 = _this.PRIVATE,
+              dimensions = _this$PRIVATE3.dimensions,
+              draw = _this$PRIVATE3.draw;
+          _this.PRIVATE.initialWidth = dimensions.width;
+          _this.PRIVATE.initialHeight = dimensions.height;
+          draw(dimensions.width, dimensions.height);
         }
       });
 
-      _this.UTIL.registerListeners(_this.PRIVATE.canvas, {
+      _this.UTIL.registerListeners(_assertThisInitialized(_this), {
         pointerenter: function pointerenter(evt) {
-          var _this$PRIVATE3 = _this.PRIVATE,
-              coords = _this$PRIVATE3.coords,
-              draw = _this$PRIVATE3.draw,
-              initialWidth = _this$PRIVATE3.initialWidth,
-              initialHeight = _this$PRIVATE3.initialHeight;
+          var _this$PRIVATE4 = _this.PRIVATE,
+              dimensions = _this$PRIVATE4.dimensions,
+              draw = _this$PRIVATE4.draw,
+              initialWidth = _this$PRIVATE4.initialWidth,
+              initialHeight = _this$PRIVATE4.initialHeight;
 
-          if (initialWidth !== coords.width || initialHeight !== coords.height) {
-            draw(coords.width, coords.height);
+          if (initialWidth !== dimensions.width || initialHeight !== dimensions.height) {
+            draw(dimensions.width, dimensions.height);
           }
         },
-        pointermove: function pointermove(evt) {
-          var context = _this.PRIVATE.context;
+        pointerdown: function pointerdown(evt) {
+          _this.PRIVATE.position = _this.PRIVATE.getRelativePosition(evt);
+          var _this$PRIVATE5 = _this.PRIVATE,
+              position = _this$PRIVATE5.position,
+              getColor = _this$PRIVATE5.getColor,
+              pointermoveHandler = _this$PRIVATE5.pointermoveHandler;
+          _this.PRIVATE.previousColor = _this.PRIVATE.selectedColor;
+          _this.PRIVATE.selectedColor = getColor(position);
 
-          var _context$getImageData = context.getImageData(evt.offsetX, evt.offsetY, 1, 1),
-              data = _context$getImageData.data;
+          _this.emit('change', {
+            previous: _this.previousColor,
+            color: _this.selectedColor,
+            position: _this.position
+          });
 
-          _this.PRIVATE.currentColor = "rgb(".concat(data[0], ",").concat(data[1], ",").concat(data[2], ")");
-          console.log(_this.currentColor);
+          document.addEventListener('pointermove', pointermoveHandler);
         }
       });
 
@@ -212,9 +404,31 @@ var AuthorColorPickerElement = (function () {
     }
 
     _createClass(AuthorColorPickerElement, [{
-      key: "currentColor",
+      key: "position",
       get: function get() {
-        return this.PRIVATE.currentColor;
+        var _this$PRIVATE6 = this.PRIVATE,
+            position = _this$PRIVATE6.position,
+            dimensions = _this$PRIVATE6.dimensions;
+        return {
+          x: {
+            px: position.x,
+            percentage: this.UTIL.getPercentageDecimal(position.x, dimensions.width)
+          },
+          y: {
+            px: position.y,
+            percentage: this.UTIL.getPercentageDecimal(position.y, dimensions.height)
+          }
+        };
+      }
+    }, {
+      key: "previousColor",
+      get: function get() {
+        return this.PRIVATE.generateColorObj(this.PRIVATE.previousColor);
+      }
+    }, {
+      key: "selectedColor",
+      get: function get() {
+        return this.PRIVATE.generateColorObj(this.PRIVATE.selectedColor);
       }
     }]);
 

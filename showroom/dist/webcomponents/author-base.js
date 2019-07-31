@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-base v1.1.4 available at github.com/author-elements/base
-// Last Build: 5/19/2019, 12:03:09 AM
+// @author.io/element-base v1.1.5 available at github.com/author-elements/base
+// Last Build: 7/30/2019, 3:46:22 AM
 var AuthorBaseElement = (function () {
   'use strict';
 
@@ -605,6 +605,22 @@ var AuthorBaseElement = (function () {
             }
 
             return id
+          }
+        },
+
+        getPercentageDecimal: {
+          value: (portion, whole, decimalPlaces = null) => {
+            let decimal = portion / whole;
+
+            if (decimal < 0) {
+              return 0
+            }
+
+            if (decimalPlaces !== null) {
+              return decimal.toFixed(decimalPlaces)
+            }
+
+            return decimal
           }
         },
 
