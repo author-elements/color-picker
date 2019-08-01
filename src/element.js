@@ -31,12 +31,12 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
 
       initialWidth: {
         private: true,
-        default: 0
+        default: 236
       },
 
-      initialheight: {
+      initialHeight: {
         private: true,
-        default: 0
+        default: 118
       },
 
       currentColor: {
@@ -239,15 +239,8 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
 
     this.UTIL.registerListeners(this, {
       connected: () => {
-        let { dimensions } = this.PRIVATE
-        this.PRIVATE.initialWidth = dimensions.width
-        this.PRIVATE.initialHeight = dimensions.height
-      },
-
-      rendered: () => {
-        let { draw } = this.PRIVATE
-        this.UTIL.registerListener(window, 'resize', evt => draw())
-        draw()
+        let { draw, initialWidth, initialHeight } = this.PRIVATE
+        draw(initialWidth, initialHeight)
       }
     })
 

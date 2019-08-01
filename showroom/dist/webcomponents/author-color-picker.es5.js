@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.0.4 available at github.com/author-elements/color-picker
-// Last Build: 7/31/2019, 8:32:41 PM
+// @author.io/element-color-picker v1.0.5 available at github.com/author-elements/color-picker
+// Last Build: 7/31/2019, 9:02:30 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -136,11 +136,11 @@ var AuthorColorPickerElement = (function () {
         },
         initialWidth: {
           private: true,
-          default: 0
+          default: 236
         },
-        initialheight: {
+        initialHeight: {
           private: true,
-          default: 0
+          default: 118
         },
         currentColor: {
           private: true,
@@ -362,28 +362,26 @@ var AuthorColorPickerElement = (function () {
 
       _this.UTIL.registerListeners(_assertThisInitialized(_this), {
         connected: function connected() {
-          var dimensions = _this.PRIVATE.dimensions;
-          _this.PRIVATE.initialWidth = dimensions.width;
-          _this.PRIVATE.initialHeight = dimensions.height;
+          var _this$PRIVATE3 = _this.PRIVATE,
+              draw = _this$PRIVATE3.draw,
+              initialWidth = _this$PRIVATE3.initialWidth,
+              initialHeight = _this$PRIVATE3.initialHeight;
+          draw(initialWidth, initialHeight);
         },
         rendered: function rendered() {
-          var draw = _this.PRIVATE.draw;
-
           _this.UTIL.registerListener(window, 'resize', function (evt) {
-            return draw();
+            return _this.PRIVATE.draw();
           });
-
-          draw();
         }
       });
 
       _this.UTIL.registerListeners(_assertThisInitialized(_this), {
         pointerenter: function pointerenter(evt) {
-          var _this$PRIVATE3 = _this.PRIVATE,
-              dimensions = _this$PRIVATE3.dimensions,
-              draw = _this$PRIVATE3.draw,
-              initialWidth = _this$PRIVATE3.initialWidth,
-              initialHeight = _this$PRIVATE3.initialHeight;
+          var _this$PRIVATE4 = _this.PRIVATE,
+              dimensions = _this$PRIVATE4.dimensions,
+              draw = _this$PRIVATE4.draw,
+              initialWidth = _this$PRIVATE4.initialWidth,
+              initialHeight = _this$PRIVATE4.initialHeight;
 
           if (initialWidth !== dimensions.width || initialHeight !== dimensions.height) {
             draw();
@@ -391,10 +389,10 @@ var AuthorColorPickerElement = (function () {
         },
         pointerdown: function pointerdown(evt) {
           _this.PRIVATE.position = _this.PRIVATE.getRelativePosition(evt);
-          var _this$PRIVATE4 = _this.PRIVATE,
-              position = _this$PRIVATE4.position,
-              getColor = _this$PRIVATE4.getColor,
-              pointermoveHandler = _this$PRIVATE4.pointermoveHandler;
+          var _this$PRIVATE5 = _this.PRIVATE,
+              position = _this$PRIVATE5.position,
+              getColor = _this$PRIVATE5.getColor,
+              pointermoveHandler = _this$PRIVATE5.pointermoveHandler;
           _this.PRIVATE.previousColor = _this.PRIVATE.selectedColor;
           _this.PRIVATE.selectedColor = getColor(position);
 
@@ -414,9 +412,9 @@ var AuthorColorPickerElement = (function () {
     _createClass(AuthorColorPickerElement, [{
       key: "position",
       get: function get() {
-        var _this$PRIVATE5 = this.PRIVATE,
-            position = _this$PRIVATE5.position,
-            dimensions = _this$PRIVATE5.dimensions;
+        var _this$PRIVATE6 = this.PRIVATE,
+            position = _this$PRIVATE6.position,
+            dimensions = _this$PRIVATE6.dimensions;
         return {
           x: {
             px: position.x,
