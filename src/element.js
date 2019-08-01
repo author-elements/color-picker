@@ -239,15 +239,16 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
 
     this.UTIL.registerListeners(this, {
       connected: () => {
-        let { dimensions, draw } = this.PRIVATE
-
+        let { dimensions } = this.PRIVATE
         this.PRIVATE.initialWidth = dimensions.width
         this.PRIVATE.initialHeight = dimensions.height
-
-        draw()
       },
 
-      rendered: () => this.UTIL.registerListener(window, 'resize', evt => this.PRIVATE.draw())
+      rendered: () => {
+        let { draw } = this.PRIVATE
+        this.UTIL.registerListener(window, 'resize', evt => draw())
+        draw()
+      }
     })
 
     this.UTIL.registerListeners(this, {

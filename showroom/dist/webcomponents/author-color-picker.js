@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.0.3 available at github.com/author-elements/color-picker
-// Last Build: 7/31/2019, 8:22:40 PM
+// @author.io/element-color-picker v1.0.4 available at github.com/author-elements/color-picker
+// Last Build: 7/31/2019, 8:32:41 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -256,15 +256,16 @@ var AuthorColorPickerElement = (function () {
 
       this.UTIL.registerListeners(this, {
         connected: () => {
-          let { dimensions, draw } = this.PRIVATE;
-
+          let { dimensions } = this.PRIVATE;
           this.PRIVATE.initialWidth = dimensions.width;
           this.PRIVATE.initialHeight = dimensions.height;
-
-          draw();
         },
 
-        rendered: () => this.UTIL.registerListener(window, 'resize', evt => this.PRIVATE.draw())
+        rendered: () => {
+          let { draw } = this.PRIVATE;
+          this.UTIL.registerListener(window, 'resize', evt => draw());
+          draw();
+        }
       });
 
       this.UTIL.registerListeners(this, {
