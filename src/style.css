@@ -1,6 +1,8 @@
 :host {
   contain: content;
   display: block;
+  /* display: flex; */
+  /* flex-direction: column; */
 }
 
 :host *,
@@ -11,9 +13,13 @@
 
 :host .wrapper {
   position: relative;
+  /* flex: 1;
+  display: flex;
+  flex-direction: column; */
 }
 
 :host canvas {
+  /* flex: 1; */
   display: block;
   width: 100%;
   height: 100%;

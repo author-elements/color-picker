@@ -68,7 +68,7 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
     })
 
     this.UTIL.definePrivateMethods({
-      draw: (width, height) => {
+      draw: (width = this.PRIVATE.dimensions.width, height = this.PRIVATE.dimensions.height) => {
         let { canvas, context } = this.PRIVATE
 
         canvas.width = width
@@ -244,8 +244,10 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
         this.PRIVATE.initialWidth = dimensions.width
         this.PRIVATE.initialHeight = dimensions.height
 
-        draw(dimensions.width, dimensions.height)
-      }
+        draw()
+      },
+
+      rendered: () => this.UTIL.registerListener(window, 'resize', evt => this.PRIVATE.draw())
     })
 
     this.UTIL.registerListeners(this, {
@@ -253,7 +255,7 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
         let { dimensions, draw, initialWidth, initialHeight } = this.PRIVATE
 
         if (initialWidth !== dimensions.width || initialHeight !== dimensions.height) {
-          draw(dimensions.width, dimensions.height)
+          draw()
         }
       },
 

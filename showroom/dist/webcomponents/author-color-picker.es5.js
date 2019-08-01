@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.0.0 available at github.com/author-elements/color-picker
-// Last Build: 7/30/2019, 9:37:25 PM
+// @author.io/element-color-picker v1.0.1 available at github.com/author-elements/color-picker
+// Last Build: 7/31/2019, 8:15:16 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -169,7 +169,9 @@ var AuthorColorPickerElement = (function () {
       });
 
       _this.UTIL.definePrivateMethods({
-        draw: function draw(width, height) {
+        draw: function draw() {
+          var width = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.PRIVATE.dimensions.width;
+          var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _this.PRIVATE.dimensions.height;
           var _this$PRIVATE = _this.PRIVATE,
               canvas = _this$PRIVATE.canvas,
               context = _this$PRIVATE.context;
@@ -365,7 +367,12 @@ var AuthorColorPickerElement = (function () {
               draw = _this$PRIVATE3.draw;
           _this.PRIVATE.initialWidth = dimensions.width;
           _this.PRIVATE.initialHeight = dimensions.height;
-          draw(dimensions.width, dimensions.height);
+          draw();
+        },
+        rendered: function rendered() {
+          return _this.UTIL.registerListener(window, 'resize', function (evt) {
+            return _this.PRIVATE.draw();
+          });
         }
       });
 
@@ -378,7 +385,7 @@ var AuthorColorPickerElement = (function () {
               initialHeight = _this$PRIVATE4.initialHeight;
 
           if (initialWidth !== dimensions.width || initialHeight !== dimensions.height) {
-            draw(dimensions.width, dimensions.height);
+            draw();
           }
         },
         pointerdown: function pointerdown(evt) {
