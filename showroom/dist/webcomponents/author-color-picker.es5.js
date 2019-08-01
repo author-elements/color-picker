@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.0.1 available at github.com/author-elements/color-picker
-// Last Build: 7/31/2019, 8:15:16 PM
+// @author.io/element-color-picker v1.0.3 available at github.com/author-elements/color-picker
+// Last Build: 7/31/2019, 8:22:40 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -103,7 +103,7 @@ var AuthorColorPickerElement = (function () {
 
       _classCallCheck(this, AuthorColorPickerElement);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AuthorColorPickerElement).call(this, "<template><style>@charset \"UTF-8\"; :host{contain:content;display:block}:host *,:host :after,:host :before{box-sizing:border-box}:host .wrapper{position:relative}:host canvas{display:block;width:100%;height:100%}:host ::slotted(*){position:absolute;z-index:1}author-color-picker{contain:content;display:block}author-color-picker *,author-color-picker :after,author-color-picker :before{box-sizing:border-box}author-color-picker .wrapper{position:relative}author-color-picker canvas{display:block;width:100%;height:100%}author-color-picker *{position:absolute;z-index:1}</style><div class=\"wrapper\"><slot></slot><div><canvas></canvas></div></div></template>"));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AuthorColorPickerElement).call(this, "<template><style>@charset \"UTF-8\"; :host{contain:content;display:flex;flex-direction:column}:host *,:host :after,:host :before{box-sizing:border-box}:host .wrapper{position:relative;flex:1;display:flex;flex-direction:column}:host .canvas-wrapper{flex:1;display:flex;flex-direction:column}:host canvas{flex:1;display:block;width:100%;height:100%}:host ::slotted(*){position:absolute;z-index:1}author-color-picker{contain:content;display:flex;flex-direction:column}author-color-picker *,author-color-picker :after,author-color-picker :before{box-sizing:border-box}author-color-picker .wrapper{position:relative;flex:1;display:flex;flex-direction:column}author-color-picker .canvas-wrapper{flex:1;display:flex;flex-direction:column}author-color-picker canvas{flex:1;display:block;width:100%;height:100%}author-color-picker *{position:absolute;z-index:1}</style><div class=\"wrapper\"><slot></slot><div class=\"canvas-wrapper\"><canvas></canvas></div></div></template>"));
 
       _this.UTIL.defineProperties({
         canvas: {

@@ -17,6 +17,12 @@
   flex-direction: column;
 }
 
+:host .canvas-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 :host canvas {
   flex: 1;
   display: block;
