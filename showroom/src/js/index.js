@@ -2,34 +2,72 @@ const Demo = new NGNX.VIEW.Registry({
   selector: '.demo',
   namespace: 'demo.',
 
+  events: {
+    'all-hue-picker': {
+      change: hue => Demo.emit('single-hue-picker.change', hue),
+      slide: hue => Demo.emit('single-hue-picker.change', hue)
+    }
+  }
+})
+
+const SingleHuePicker = new NGNX.VIEW.Registry({
+  parent: Demo,
+  selector: '.single-hue.picker',
+  namespace: 'single-hue-picker.',
+
   references: {
-    swatch: '.selected.color',
-    preview: '.color.preview',
     picker: 'author-color-picker',
-    target: 'author-color-picker .target'
+    selectedSwatch: '.swatch .selected.color',
+    previewSwatch: '.swatch .color.preview'
+  },
+
+  events: {
+    change: hue => SingleHuePicker.ref.picker.element.hue = hue
   },
 
   init () {
-    let { picker, preview, swatch, target } = this.ref
-    window.cp = picker.element
+    let { picker, previewSwatch, selectedSwatch } = this.ref
+    window.cp1 = picker.element
 
-    picker.on('sample', evt => {
+    picker.on('slide', evt => {
       let { color, position } = evt.detail
-
-      preview.style.background = color.rgba
-
-      target.element.style.left = `${position.x.pct * 100}%`
-      target.element.style.top = `${position.y.pct * 100}%`
+      previewSwatch.style.background = color.rgba
     })
 
     picker.on('change', evt => {
       let { color, position } = evt.detail
+      previewSwatch.style.background = color.rgba
+      selectedSwatch.style.background = color.rgba
+    })
+  }
+})
 
-      preview.style.background = color.rgba
-      swatch.style.background = color.rgba
+const AllHuePicker = new NGNX.VIEW.Registry({
+  parent: Demo,
+  selector: '.all-hue.picker',
+  namespace: 'all-hue-picker.',
 
-      target.element.style.left = `${position.x.pct * 100}%`
-      target.element.style.top = `${position.y.pct * 100}%`
+  references: {
+    picker: 'author-color-picker',
+    selectedSwatch: '.selected.color',
+    previewSwatch: '.color.preview'
+  },
+
+  init () {
+    let { picker, previewSwatch, selectedSwatch } = this.ref
+    window.cp2 = picker.element
+
+    picker.on('slide', evt => {
+      let { color, position } = evt.detail
+      previewSwatch.style.background = color.rgba
+      this.emit('slide', picker.element.hue)
+    })
+
+    picker.on('change', evt => {
+      let { color, position } = evt.detail
+      previewSwatch.style.background = color.rgba
+      selectedSwatch.style.background = color.rgba
+      this.emit('change', picker.element.hue)
     })
   }
 })

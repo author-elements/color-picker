@@ -1,8 +1,80 @@
-class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
+class AuthorColorPickerElement extends AuthorSliderElement {
   constructor () {
     super(`{{TEMPLATE-STRING}}`)
 
+    // Override AuthorSliderElement defaults
+    this.PRIVATE.defaultAxis = '*'
+
+    this.PRIVATE.pointerupHandler = evt => {
+      let { generateColorObject, generatePositionObject, handles, pointermoveHandler, pointerupHandler } = this.PRIVATE
+      let reposition = true
+
+      // this.PRIVATE.previousColor = this.PRIVATE.selectedColor
+      // this.PRIVATE.selectedColor = currentColor
+
+      if (handles.length > 1) {
+        reposition = false
+      } else if (handles.length !== 0) {
+        handles.item(0).position = generatePositionObject()
+      }
+
+      if (reposition) {
+        this.emit('change', {
+          // previous: this.previousColor,
+          color: generateColorObject(),
+          position: generatePositionObject()
+        })
+      }
+
+      document.removeEventListener('pointermove', pointermoveHandler)
+      document.removeEventListener('pointerup', pointerupHandler)
+    }
+
+    this.PRIVATE.pointermoveHandler = evt => {
+      if (evt.buttons < 1) {
+        return
+      }
+
+      document.addEventListener('pointerup', this.PRIVATE.pointerupHandler)
+
+      let { getPercentageDecimal } = this.UTIL
+      let { generateColorObject, generatePositionObject, handles, position } = this.PRIVATE
+      let relative = this.PRIVATE.getRelativePosition(evt)
+
+      if ((!this.position.x || relative.x !== position.x) || (!this.position.y || relative.y !== position.y)) {
+        this.PRIVATE.setColor(relative)
+        this.PRIVATE.position = relative
+
+        if (handles.length !== 0) {
+          handles.item(0).position = this.position
+        }
+
+        this.emit('slide', {
+          color: generateColorObject(),
+          position: generatePositionObject()
+        })
+      }
+    }
+
     this.UTIL.defineProperties({
+      defaultMode: {
+        private: true,
+        readonly: true,
+        default: 'single-hue'
+      },
+
+      defaultOrientation: {
+        private: true,
+        readonly: true,
+        default: 'horizontal'
+      },
+
+      validModes: {
+        private: true,
+        readonly: true,
+        default: ['single-hue', 'all-hues', 'gradient']
+      },
+
       hue: {
         private: true,
         default: 0
@@ -35,20 +107,6 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
         get: () => this.PRIVATE.canvas.getContext('2d')
       },
 
-      position: {
-        private: true,
-        default: {
-          x: 0,
-          y: 0
-        }
-      },
-
-      dimensions: {
-        private: true,
-        readonly: true,
-        get: () => this.PRIVATE.canvas.getBoundingClientRect()
-      },
-
       initialWidth: {
         private: true,
         default: 236
@@ -60,13 +118,14 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
       }
     })
 
+    this.UTIL.defineAttributes({
+      mode: this.PRIVATE.defaultMode,
+      orientation: this.PRIVATE.defaultOrientation
+    })
+
     this.UTIL.definePrivateMethods({
-      draw: (width = this.PRIVATE.dimensions.width, height = this.PRIVATE.dimensions.height, hue = this.PRIVATE.hue) => {
-        let { canvas, context, HSVToRGB } = this.PRIVATE
-
-        canvas.width = width
-        canvas.height = height
-
+      drawSingleHueSpectrum: (hue, width, height) => {
+        let { context, HSVToRGB } = this.PRIVATE
         let rgb = HSVToRGB(hue, 100, 100)
 
         context.clearRect(0, 0, width, height)
@@ -91,6 +150,45 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
         context.fillRect(0, 0, width, height)
       },
 
+      drawAllHueSpectrum: (width, height, orientation = 'horizontal') => {
+        let { context } = this.PRIVATE
+
+        // this.PRIVATE.hue = 0
+
+        let args = orientation === 'horizontal'
+          ? [0, 0, width, 0]
+          : [0, 0, 0, height]
+
+        let gradient = context.createLinearGradient(...args)
+
+        gradient.addColorStop(0 / 6, '#F00')
+        gradient.addColorStop(1 / 6, '#FF0')
+        gradient.addColorStop(2 / 6, '#0F0')
+        gradient.addColorStop(3 / 6, '#0FF')
+        gradient.addColorStop(4 / 6, '#00F')
+        gradient.addColorStop(5 / 6, '#F0F')
+        gradient.addColorStop(6 / 6, '#F00')
+
+        context.fillStyle = gradient
+        context.fillRect(0, 0, width, height)
+      },
+
+      draw: (width = this.clientWidth, height = this.clientHeight, hue = this.PRIVATE.hue) => {
+        let { canvas, drawAllHueSpectrum, drawSingleHueSpectrum } = this.PRIVATE
+
+        canvas.width = width
+        canvas.height = height
+
+        switch (this.mode) {
+          case 'single-hue': return drawSingleHueSpectrum(hue, width, height)
+          case 'all-hues': return drawAllHueSpectrum(width, height)
+
+          default: this.UTIL.throwError({
+            message: `Invalid mode "${this.mode}"`
+          })
+        }
+      },
+
       generateColorObject: (h = this.PRIVATE.hue, s = this.PRIVATE.saturation, v = this.PRIVATE.value) => {
         let { alpha, HSVToRGB } = this.PRIVATE
 
@@ -106,32 +204,6 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
           a: alpha,
           hex: `#${this.PRIVATE.RGBToHex(...rgb)}`,
           rgba: `rgba(${rgb.join(',')},${alpha / 100})`
-        }
-      },
-
-      generatePositionObject: (position = this.PRIVATE.position) => ({
-        x: {
-          px: position.x,
-          pct: this.UTIL.getPercentageDecimal(position.x, this.clientWidth)
-        },
-
-        y: {
-          px: position.y,
-          pct: this.UTIL.getPercentageDecimal(position.y, this.clientHeight)
-        }
-      }),
-
-      getRelativePosition: evt => {
-        let { top, left } = this.PRIVATE.dimensions
-
-        let offset = {
-          x: evt.pageX - left - this.clientLeft,
-          y: evt.pageY - top - this.clientTop
-        }
-
-        return {
-          x: Math.min(Math.max(offset.x, 0), this.clientWidth),
-          y: Math.min(Math.max(offset.y, 0), this.clientHeight)
         }
       },
 
@@ -221,68 +293,88 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
         return hex.toUpperCase()
       },
 
-      pointermoveHandler: evt => {
-        if (evt.buttons < 1) {
-          return
-        }
-
-        document.addEventListener('pointerup', this.PRIVATE.pointerupHandler)
-
+      setColor: position => {
         let { getPercentageDecimal } = this.UTIL
-        let { generateColorObject, generatePositionObject, position } = this.PRIVATE
-        let relative = this.PRIVATE.getRelativePosition(evt)
 
-        if (relative.x !== position.x || relative.y !== position.y) {
-          this.PRIVATE.saturation = getPercentageDecimal(relative.x, this.clientWidth) * 100
-          this.PRIVATE.value = 100 - (getPercentageDecimal(relative.y, this.clientHeight) * 100)
-          this.PRIVATE.position = relative
+        switch (this.mode) {
+          case 'single-hue':
+            this.PRIVATE.saturation = getPercentageDecimal(position.x, this.clientWidth) * 100
+            this.PRIVATE.value = 100 - (getPercentageDecimal(position.y, this.clientHeight) * 100)
+            break
 
-          this.emit('sample', {
-            color: generateColorObject(),
-            position: generatePositionObject()
-          })
+          case 'all-hues':
+            this.PRIVATE.hue = this.orientation === 'horizontal'
+              ? getPercentageDecimal(position.x, this.clientWidth) * 360
+              : getPercentageDecimal(position.y, this.clientHeight) * 360
+
+            this.PRIVATE.saturation = 100
+            this.PRIVATE.value = 100
+            break
         }
-      },
-
-      pointerupHandler: evt => {
-        let { generateColorObject, generatePositionObject, pointermoveHandler, pointerupHandler } = this.PRIVATE
-
-        // this.PRIVATE.previousColor = this.PRIVATE.selectedColor
-        // this.PRIVATE.selectedColor = currentColor
-
-        this.emit('change', {
-          // previous: this.previousColor,
-          color: generateColorObject(),
-          position: generatePositionObject()
-        })
-
-        document.removeEventListener('pointermove', pointermoveHandler)
-        document.removeEventListener('pointerup', pointerupHandler)
       }
     })
 
     this.UTIL.registerListeners(this, {
+      'attribute.change': evt => {
+        let { attribute, oldValue, newValue } = evt.detail
+
+        if (newValue === oldValue) {
+          return
+        }
+
+        let { defaultMode, validModes } = this.PRIVATE
+
+        switch (attribute) {
+          case 'mode':
+            let arr = newValue.split(' ').filter(axis => validModes.includes(axis))
+
+            if (!arr.length) {
+              this.setAttribute('mode', defaultMode)
+
+              return this.UTIL.throwError({
+                message: `Invalid mode "${newValue}". Valid values include: "${validModes.join('", "')}"`
+              })
+            }
+
+            break
+        }
+      },
+
       connected: () => {
+        // Reset AuthorSliderElement defaults
+        if (!this.hasAttribute('axis')) {
+          this.axis = this.PRIVATE.defaultAxis
+        }
+
+        this.removeEventListener('pointerdown', this.PRIVATE.pointerdownHandler)
+
         let { draw, initialWidth, initialHeight } = this.PRIVATE
         draw(initialWidth, initialHeight)
       },
 
-      pointerenter: evt => {
-        let { dimensions, draw, initialWidth, initialHeight } = this.PRIVATE
-
-        if (initialWidth !== dimensions.width || initialHeight !== dimensions.height) {
-          draw()
-        }
-      },
+      // pointerenter: evt => {
+      //   let { draw, initialWidth, initialHeight } = this.PRIVATE
+      //
+      //   if (initialWidth !== this.clientWidth || initialHeight !== this.clientHeight) {
+      //     draw()
+      //   }
+      // },
 
       pointerdown: evt => {
         this.PRIVATE.position = this.PRIVATE.getRelativePosition(evt)
 
         let { getPercentageDecimal } = this.UTIL
-        let { generateColorObject, generatePositionObject, HSVToRGB, hue, pointermoveHandler, position } = this.PRIVATE
+        let { generateColorObject, generatePositionObject, handles, HSVToRGB, hue, pointermoveHandler, position } = this.PRIVATE
 
-        this.PRIVATE.saturation = getPercentageDecimal(position.x, this.clientWidth) * 100
-        this.PRIVATE.value = 100 - (getPercentageDecimal(position.y, this.clientHeight) * 100)
+        if (handles.length > 1) {
+          return
+        }
+
+        this.PRIVATE.setColor(position)
+
+        if (handles.length !== 0) {
+          handles.item(0).position = this.position
+        }
 
         this.emit('change', {
           color: generateColorObject(),
@@ -294,60 +386,74 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
     })
   }
 
+  static get observedAttributes () {
+    return [...AuthorSliderElement.observedAttributes, 'mode', 'orientation']
+  }
+
+  get hue () {
+    return this.PRIVATE.hue
+  }
+
   set hue (val) {
-    this.PRIVATE.hue = Math.max(0, Math.min(360, val))
+    val = Math.max(0, Math.min(360, val))
+    this.PRIVATE.hue = val === 360 ? 0 : val
     this.PRIVATE.draw()
+
+    this.emit('change', {
+      color: this.PRIVATE.generateColorObject(),
+      position: this.PRIVATE.generatePositionObject()
+    })
   }
 
-  set saturation (val) {
-    this.PRIVATE.saturation = Math.max(0, Math.min(100, val))
-    console.log('REPOSITION TARGET')
-  }
+  // set saturation (val) {
+  //   this.PRIVATE.saturation = Math.max(0, Math.min(100, val))
+  //   console.log('REPOSITION TARGET')
+  // }
 
-  set value (val) {
-    this.PRIVATE.value = Math.max(0, Math.min(100, val))
-    console.log('REPOSITION TARGET')
-  }
+  // set value (val) {
+  //   this.PRIVATE.value = Math.max(0, Math.min(100, val))
+  //   console.log('REPOSITION TARGET')
+  // }
 
-  set hsv ({ h, s, v }) {
-    console.log(h, s, v)
-  }
+  // set hsv ({ h, s, v }) {
+  //   console.log(h, s, v)
+  // }
 
-  set lightness (val) {
-    console.log(val);
-  }
+  // set lightness (val) {
+  //   console.log(val);
+  // }
 
-  set hsl ({ h, s, l }) {
-    console.log(h, s, l)
-  }
+  // set hsl ({ h, s, l }) {
+  //   console.log(h, s, l)
+  // }
 
-  set red (val) {
-    console.log(val);
-  }
+  // set red (val) {
+  //   console.log(val);
+  // }
 
-  set g (val) {
-    console.log(val);
-  }
+  // set g (val) {
+  //   console.log(val);
+  // }
 
-  set blue (val) {
-    console.log(val);
-  }
+  // set blue (val) {
+  //   console.log(val);
+  // }
 
-  set rgb ({ r, g, b }) {
-    console.log(r, g, b)
-  }
+  // set rgb ({ r, g, b }) {
+  //   console.log(r, g, b)
+  // }
 
-  get hex () {
+  // get hex () {
+  //
+  // }
 
-  }
+  // set hex (val) {
+  //   console.log(val);
+  // }
 
-  set hex (val) {
-    console.log(val);
-  }
-
-  set alpha (val) {
-    console.log(val)
-  }
+  // set alpha (val) {
+  //   console.log(val)
+  // }
 
   get position () {
     return this.PRIVATE.generatePositionObject()
@@ -357,15 +463,9 @@ class AuthorColorPickerElement extends AuthorBaseElement(HTMLElement) {
   //   return this.PRIVATE.generateColorObj(this.PRIVATE.previousColor)
   // }
 
-  // get selectedColor () {
-  //   return this.PRIVATE.HSVToRGB({
-  //     h: this.PRIVATE.hue,
-  //     s: this.UTIL.getPercentageDecimal(position.x, this.clientWidth) * 100,
-  //     v: 100 - (this.UTIL.getPercentageDecimal(position.y, this.clientHeight) * 100)
-  //   })
-  //
-  //   // return this.PRIVATE.generateColorObj(this.PRIVATE.selectedColor)
-  // }
+  get selectedColor () {
+    return this.PRIVATE.generateColorObject()
+  }
 
   // set selectedColor (color) {
   //   if (color.startsWith('#')) {

@@ -21,6 +21,8 @@
     <script src="webcomponents/author-options.js"></script>
     <script src="webcomponents/author-option.js"></script>
     <script src="webcomponents/author-select.js"></script>
+    <script src="webcomponents/author-slider.js"></script>
+    <script src="webcomponents/author-slider-handle.js"></script>
     <script src="webcomponents/author-color-picker.js"></script>
   </head>
 
@@ -46,7 +48,7 @@
           </select>
         </author-control>
 
-        <div class="picker">
+        <div class="single-hue picker">
           <div class="swatches">
             <div class="swatch">
               <div class="label">Preview:</div>
@@ -60,7 +62,25 @@
           </div>
 
           <author-color-picker>
-            <div class="target"></div>
+            <author-slider-handle></author-slider-handle>
+          </author-color-picker>
+        </div>
+
+        <div class="all-hue picker">
+          <div class="swatches">
+            <div class="swatch">
+              <div class="label">Preview:</div>
+              <div class="color preview"></div>
+            </div>
+
+            <div class="swatch">
+              <div class="label">Selected:</div>
+              <div class="selected color"></div>
+            </div>
+          </div>
+
+          <author-color-picker mode="all-hues" axis="x">
+            <author-slider-handle></author-slider-handle>
           </author-color-picker>
         </div>
       </div>

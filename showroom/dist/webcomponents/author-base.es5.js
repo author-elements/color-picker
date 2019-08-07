@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-base v1.1.5 available at github.com/author-elements/base
-// Last Build: 7/30/2019, 3:46:22 AM
+// @author.io/element-base v1.2.0 available at github.com/author-elements/base
+// Last Build: 8/1/2019, 2:14:29 AM
 var AuthorBaseElement = (function () {
   'use strict';
 
@@ -675,23 +675,6 @@ var AuthorBaseElement = (function () {
             },
 
             /**
-             * @method createEvent
-             * Returns a new CustomEvent object.
-             * @param  {[type]} name
-             * Name of the event
-             * @param  {object} detail
-             * Properties to add to event.detail
-             * @return {CustomEvent}
-             */
-            createEvent: {
-              value: function value(name, detail) {
-                return new CustomEvent(name, {
-                  detail: detail
-                });
-              }
-            },
-
-            /**
              * @method generateGuid
              * @param  {string} [prefix=null]
              * String to prepend to the beginning of the id.
@@ -1219,9 +1202,35 @@ var AuthorBaseElement = (function () {
 
         }, {
           key: "emit",
-          value: function emit(name, detail) {
-            var target = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-            var event = this.UTIL.createEvent(name, detail);
+          value: function emit(_ref) {
+            var _ref$name = _ref.name,
+                name = _ref$name === void 0 ? null : _ref$name,
+                _ref$detail = _ref.detail,
+                detail = _ref$detail === void 0 ? null : _ref$detail,
+                _ref$cfg = _ref.cfg,
+                cfg = _ref$cfg === void 0 ? {
+              bubbles: false,
+              cancelable: false,
+              composed: false
+            } : _ref$cfg,
+                _ref$target = _ref.target,
+                target = _ref$target === void 0 ? null : _ref$target;
+
+            if (typeof arguments[0] === 'string') {
+              name = arguments[0];
+              detail = arguments[1] || null;
+              target = arguments[2] || null;
+            }
+
+            if (!name) {
+              return this.UTIL.throwError({
+                message: 'Event name is required'
+              });
+            }
+
+            var event = new CustomEvent(name, Object.assign({}, cfg, {
+              detail: detail
+            }));
 
             if (target) {
               return target.dispatchEvent(event);

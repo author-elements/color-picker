@@ -39,18 +39,30 @@
       border: 2px solid var(--grey-n08);
       cursor: crosshair;
 
-      & .target {
-        transform: translate(-50%, -50%);
-
-        height: 1em;
-        width: 1em;
+      & author-slider-handle {
         background: transparent;
         box-shadow:
           inset 0 0 0 1px black,
           inset 0 0 0 2px color-mod(white, a(61.8%)),
           0 0 0 1px color-mod(white, a(61.8%))
         ;
-        border-radius: 50%;
+      }
+    }
+
+    &.single-hue author-color-picker author-slider-handle {
+      transform: translate(-50%, -50%);
+      height: 1em;
+      width: 1em;
+      border-radius: 50%;
+    }
+
+    &.all-hue author-color-picker {
+      height: 2em;
+
+      & author-slider-handle {
+        transform: translateX(-50%);
+        height: 100%;
+        width: .618em;
       }
     }
   }
