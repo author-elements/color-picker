@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.0.9 available at github.com/author-elements/color-picker
-// Last Build: 8/24/2019, 11:23:00 PM
+// @author.io/element-color-picker v1.0.10 available at github.com/author-elements/color-picker
+// Last Build: 8/25/2019, 4:45:02 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -161,7 +161,7 @@ var AuthorColorPickerElement = (function () {
 
       _classCallCheck(this, AuthorColorPickerElement);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AuthorColorPickerElement).call(this, "<template><style>@charset \"UTF-8\"; :host{contain:content;display:flex;flex-direction:column}:host *,:host :after,:host :before{box-sizing:border-box}:host .wrapper{position:relative;flex:1;display:flex;flex-direction:column}:host .canvas-wrapper{flex:1;display:flex;flex-direction:column}:host canvas{flex:1;display:block;width:100%;height:100%}:host ::slotted(*){position:absolute;z-index:1}author-color-picker{contain:content;display:flex;flex-direction:column}author-color-picker *,author-color-picker :after,author-color-picker :before{box-sizing:border-box}author-color-picker .wrapper{position:relative;flex:1;display:flex;flex-direction:column}author-color-picker .canvas-wrapper{flex:1;display:flex;flex-direction:column}author-color-picker canvas{flex:1;display:block;width:100%;height:100%}author-color-picker *{position:absolute;z-index:1}</style><div class=\"wrapper\"><slot></slot><div class=\"canvas-wrapper\"><canvas></canvas></div></div></template>")); // Override AuthorSliderElement defaults
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AuthorColorPickerElement).call(this, "<template><style>@charset \"UTF-8\"; :host{contain:content;display:flex;flex-direction:column}:host *,:host :after,:host :before{box-sizing:border-box}:host ::slotted(*){position:absolute;z-index:1}:host,:host([mode=single-hue]){background:linear-gradient(to bottom,transparent 0,#000 100%),linear-gradient(to right,#fff 0,transparent 100%)}:host([mode=all-hues]){background:linear-gradient(to right,red 0,#ff0 calc(1 / 6 * 100%),#0f0 calc(1 / 3 * 100%),#0ff 50%,#00f calc(2 / 3 * 100%),#f0f calc(5 / 6 * 100%),red 100%)}author-color-picker{contain:content;display:flex;flex-direction:column}author-color-picker *,author-color-picker :after,author-color-picker :before{box-sizing:border-box}author-color-picker *{position:absolute;z-index:1}author-color-picker,author-color-picker[mode=single-hue]{background:linear-gradient(to bottom,transparent 0,#000 100%),linear-gradient(to right,#fff 0,transparent 100%)}author-color-picker[mode=all-hues]{background:linear-gradient(to right,red 0,#ff0 calc(1 / 6 * 100%),#0f0 calc(1 / 3 * 100%),#0ff 50%,#00f calc(2 / 3 * 100%),#f0f calc(5 / 6 * 100%),red 100%)}</style><slot></slot></template>")); // Override AuthorSliderElement defaults
 
       _this.PRIVATE.defaultAxis = '*';
 
@@ -257,28 +257,6 @@ var AuthorColorPickerElement = (function () {
         alpha: {
           private: true,
           default: 100
-        },
-        canvas: {
-          private: true,
-          readonly: true,
-          get: function get() {
-            return _this.shadowRoot.querySelector('canvas');
-          }
-        },
-        context: {
-          private: true,
-          readonly: true,
-          get: function get() {
-            return _this.PRIVATE.canvas.getContext('2d');
-          }
-        },
-        initialWidth: {
-          private: true,
-          default: 236
-        },
-        initialHeight: {
-          private: true,
-          default: 118
         }
       });
 
@@ -288,87 +266,52 @@ var AuthorColorPickerElement = (function () {
       });
 
       _this.UTIL.definePrivateMethods({
-        drawSingleHueSpectrum: function drawSingleHueSpectrum(hue, width, height) {
-          var _this$PRIVATE3 = _this.PRIVATE,
-              context = _this$PRIVATE3.context,
-              HSVToRGB = _this$PRIVATE3.HSVToRGB;
-          var rgb = HSVToRGB(hue, 100, 100);
-          context.clearRect(0, 0, width, height);
-          context.fillStyle = "rgba(".concat(rgb[0], ", ").concat(rgb[1], ", ").concat(rgb[2], ", 1)");
-          context.fillRect(0, 0, width, height);
-          var gradient = {
-            x: context.createLinearGradient(0, 0, width, 0),
-            y: context.createLinearGradient(0, 0, 0, height)
-          };
-          gradient.x.addColorStop(0, 'rgba(255, 255, 255, 1)');
-          gradient.x.addColorStop(1, 'rgba(255, 255, 255, 0)');
-          context.fillStyle = gradient.x;
-          context.fillRect(0, 0, width, height);
-          gradient.y.addColorStop(0, 'rgba(0, 0, 0, 0)');
-          gradient.y.addColorStop(1, 'rgba(0, 0, 0, 1)');
-          context.fillStyle = gradient.y;
-          context.fillRect(0, 0, width, height);
-        },
-        drawAllHueSpectrum: function drawAllHueSpectrum(width, height) {
-          var orientation = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'horizontal';
-          var context = _this.PRIVATE.context; // this.PRIVATE.hue = 0
-
-          var args = orientation === 'horizontal' ? [0, 0, width, 0] : [0, 0, 0, height];
-          var gradient = context.createLinearGradient.apply(context, args);
-          gradient.addColorStop(0 / 6, '#F00');
-          gradient.addColorStop(1 / 6, '#FF0');
-          gradient.addColorStop(2 / 6, '#0F0');
-          gradient.addColorStop(3 / 6, '#0FF');
-          gradient.addColorStop(4 / 6, '#00F');
-          gradient.addColorStop(5 / 6, '#F0F');
-          gradient.addColorStop(6 / 6, '#F00');
-          context.fillStyle = gradient;
-          context.fillRect(0, 0, width, height);
-        },
         draw: function draw() {
-          var width = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.clientWidth;
-          var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _this.clientHeight;
-          var hue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _this.PRIVATE.hue;
-          var _this$PRIVATE4 = _this.PRIVATE,
-              canvas = _this$PRIVATE4.canvas,
-              drawAllHueSpectrum = _this$PRIVATE4.drawAllHueSpectrum,
-              drawSingleHueSpectrum = _this$PRIVATE4.drawSingleHueSpectrum;
-          canvas.width = width;
-          canvas.height = height;
+          var _this$PRIVATE3 = _this.PRIVATE,
+              handles = _this$PRIVATE3.handles,
+              hue = _this$PRIVATE3.hue,
+              HSVToRGB = _this$PRIVATE3.HSVToRGB,
+              saturation = _this$PRIVATE3.saturation,
+              value = _this$PRIVATE3.value;
 
           switch (_this.mode) {
             case 'single-hue':
-              return drawSingleHueSpectrum(hue, width, height);
+              return _this.UTIL.setStyleProperty('bgColorRule', 'background-color', "rgba(".concat(HSVToRGB(hue, 100, 100).join(', '), ", 1)"));
+          }
 
-            case 'all-hues':
-              return drawAllHueSpectrum(width, height);
-
-            default:
-              _this.UTIL.throwError({
-                message: "Invalid mode \"".concat(_this.mode, "\"")
-              });
-
+          if (handles.length === 1) {
+            handles.item(0).position = {
+              x: {
+                pct: saturation / 100
+              },
+              y: {
+                pct: 1 - value / 100
+              }
+            };
           }
         },
         generateColorObject: function generateColorObject() {
-          var _this$PRIVATE6;
+          var _this$PRIVATE5;
 
           var h = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.PRIVATE.hue;
           var s = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _this.PRIVATE.saturation;
           var v = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _this.PRIVATE.value;
-          var _this$PRIVATE5 = _this.PRIVATE,
-              alpha = _this$PRIVATE5.alpha,
-              HSVToRGB = _this$PRIVATE5.HSVToRGB;
+          var _this$PRIVATE4 = _this.PRIVATE,
+              alpha = _this$PRIVATE4.alpha,
+              HSVToRGB = _this$PRIVATE4.HSVToRGB;
           var rgb = HSVToRGB(h, s, v);
           var r = rgb[0];
           var g = rgb[1];
           var b = rgb[2];
           return {
+            hue: _this.PRIVATE.hue,
+            saturation: _this.PRIVATE.saturation,
+            value: _this.PRIVATE.value,
             r: r,
             g: g,
             b: b,
-            a: alpha,
-            hex: "#".concat((_this$PRIVATE6 = _this.PRIVATE).RGBToHex.apply(_this$PRIVATE6, _toConsumableArray(rgb))),
+            alpha: alpha,
+            hex: "#".concat((_this$PRIVATE5 = _this.PRIVATE).RGBToHex.apply(_this$PRIVATE5, _toConsumableArray(rgb))),
             rgba: "rgba(".concat(rgb.join(','), ",").concat(alpha / 100, ")")
           };
         },
@@ -524,28 +467,17 @@ var AuthorColorPickerElement = (function () {
           }
         },
         setRGB: function setRGB(r, g, b) {
-          var _this$PRIVATE7 = _this.PRIVATE,
-              generateColorObject = _this$PRIVATE7.generateColorObject,
-              generatePositionObject = _this$PRIVATE7.generatePositionObject,
-              handles = _this$PRIVATE7.handles,
-              RGBToHSV = _this$PRIVATE7.RGBToHSV;
+          var _this$PRIVATE6 = _this.PRIVATE,
+              generateColorObject = _this$PRIVATE6.generateColorObject,
+              generatePositionObject = _this$PRIVATE6.generatePositionObject,
+              handles = _this$PRIVATE6.handles,
+              RGBToHSV = _this$PRIVATE6.RGBToHSV;
           var hsv = RGBToHSV(r, g, b);
           _this.PRIVATE.hue = hsv[0] * 360;
           _this.PRIVATE.saturation = hsv[1] * 100;
           _this.PRIVATE.value = hsv[2] * 100;
 
           _this.PRIVATE.draw();
-
-          if (handles.length === 1) {
-            handles.item(0).position = {
-              x: {
-                pct: hsv[1]
-              },
-              y: {
-                pct: 1 - hsv[2]
-              }
-            };
-          }
 
           _this.emit('change', {
             color: generateColorObject(),
@@ -565,9 +497,9 @@ var AuthorColorPickerElement = (function () {
             return;
           }
 
-          var _this$PRIVATE8 = _this.PRIVATE,
-              defaultMode = _this$PRIVATE8.defaultMode,
-              validModes = _this$PRIVATE8.validModes;
+          var _this$PRIVATE7 = _this.PRIVATE,
+              defaultMode = _this$PRIVATE7.defaultMode,
+              validModes = _this$PRIVATE7.validModes;
 
           switch (attribute) {
             case 'mode':
@@ -587,37 +519,31 @@ var AuthorColorPickerElement = (function () {
           }
         },
         connected: function connected() {
-          // Reset AuthorSliderElement defaults
+          // Remove default author-slider pointerdown handler
+          _this.removeEventListener('pointerdown', _this.PRIVATE.pointerdownHandler); // Reset AuthorSliderElement defaults
+
+
           if (!_this.hasAttribute('axis')) {
             _this.axis = _this.PRIVATE.defaultAxis;
           }
 
-          _this.removeEventListener('pointerdown', _this.PRIVATE.pointerdownHandler);
+          _this.UTIL.insertStyleRules({
+            bgColorRule: ':host {}'
+          });
 
-          var _this$PRIVATE9 = _this.PRIVATE,
-              draw = _this$PRIVATE9.draw,
-              initialWidth = _this$PRIVATE9.initialWidth,
-              initialHeight = _this$PRIVATE9.initialHeight;
-          draw(initialWidth, initialHeight);
+          _this.PRIVATE.draw();
         },
-        // pointerenter: evt => {
-        //   let { draw, initialWidth, initialHeight } = this.PRIVATE
-        //
-        //   if (initialWidth !== this.clientWidth || initialHeight !== this.clientHeight) {
-        //     draw()
-        //   }
-        // },
         pointerdown: function pointerdown(evt) {
           _this.PRIVATE.position = _this.PRIVATE.getRelativePosition(evt);
           var getPercentageDecimal = _this.UTIL.getPercentageDecimal;
-          var _this$PRIVATE10 = _this.PRIVATE,
-              generateColorObject = _this$PRIVATE10.generateColorObject,
-              generatePositionObject = _this$PRIVATE10.generatePositionObject,
-              handles = _this$PRIVATE10.handles,
-              HSVToRGB = _this$PRIVATE10.HSVToRGB,
-              hue = _this$PRIVATE10.hue,
-              pointermoveHandler = _this$PRIVATE10.pointermoveHandler,
-              position = _this$PRIVATE10.position;
+          var _this$PRIVATE8 = _this.PRIVATE,
+              generateColorObject = _this$PRIVATE8.generateColorObject,
+              generatePositionObject = _this$PRIVATE8.generatePositionObject,
+              handles = _this$PRIVATE8.handles,
+              HSVToRGB = _this$PRIVATE8.HSVToRGB,
+              hue = _this$PRIVATE8.hue,
+              pointermoveHandler = _this$PRIVATE8.pointermoveHandler,
+              position = _this$PRIVATE8.position;
 
           if (handles.length > 1) {
             return;
@@ -698,9 +624,9 @@ var AuthorColorPickerElement = (function () {
     }, {
       key: "hex",
       set: function set(val) {
-        var _this$PRIVATE11;
+        var _this$PRIVATE9;
 
-        (_this$PRIVATE11 = this.PRIVATE).setRGB.apply(_this$PRIVATE11, _toConsumableArray(this.PRIVATE.hexToRGB(val)));
+        (_this$PRIVATE9 = this.PRIVATE).setRGB.apply(_this$PRIVATE9, _toConsumableArray(this.PRIVATE.hexToRGB(val)));
       } // set alpha (val) {
       //   console.log(val)
       // }

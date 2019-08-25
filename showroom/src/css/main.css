@@ -36,6 +36,7 @@
     }
 
     & author-color-picker {
+      height: 23.6em;
       border: 2px solid var(--grey-n08);
       cursor: crosshair;
 

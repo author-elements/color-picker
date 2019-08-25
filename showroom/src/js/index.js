@@ -6,6 +6,10 @@ const Demo = new NGNX.VIEW.Registry({
     'all-hue-picker': {
       change: hue => Demo.emit('single-hue-picker.change', hue),
       slide: hue => Demo.emit('single-hue-picker.change', hue)
+    },
+
+    'single-hue-picker': {
+      change: hue => Demo.emit('single-hue-picker.change', hue)
     }
   }
 })
@@ -38,6 +42,7 @@ const SingleHuePicker = new NGNX.VIEW.Registry({
       let { color, position } = evt.detail
       previewSwatch.style.background = color.rgba
       selectedSwatch.style.background = color.rgba
+      this.emit('change', picker.element.hue)
     })
   }
 })
@@ -47,15 +52,38 @@ const AllHuePicker = new NGNX.VIEW.Registry({
   selector: '.all-hue.picker',
   namespace: 'all-hue-picker.',
 
+  properties: {
+    suppressEvents: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   references: {
     picker: 'author-color-picker',
     selectedSwatch: '.selected.color',
     previewSwatch: '.color.preview'
   },
 
+  events: {
+    change: hue => {
+      AllHuePicker.properties.suppressEvents = true
+      AllHuePicker.ref.picker.element.hue = hue
+    }
+  },
+
   init () {
+    let suppressEvents = false
+
     let { picker, previewSwatch, selectedSwatch } = this.ref
     window.cp2 = picker.element
+
+    this.on({
+      set: hue => {
+        suppressEvents = true
+        picker.element.hue = hue
+      }
+    })
 
     picker.on('slide', evt => {
       let { color, position } = evt.detail
@@ -67,7 +95,13 @@ const AllHuePicker = new NGNX.VIEW.Registry({
       let { color, position } = evt.detail
       previewSwatch.style.background = color.rgba
       selectedSwatch.style.background = color.rgba
-      this.emit('change', picker.element.hue)
+
+      if (!suppressEvents) {
+        console.log('fire change event');
+        // this.emit('change', picker.element.hue)
+      }
+
+      suppressEvents = false
     })
   }
 })

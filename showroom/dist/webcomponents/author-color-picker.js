@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.0.9 available at github.com/author-elements/color-picker
-// Last Build: 8/24/2019, 11:23:00 PM
+// @author.io/element-color-picker v1.0.10 available at github.com/author-elements/color-picker
+// Last Build: 8/25/2019, 4:45:02 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -17,7 +17,7 @@ var AuthorColorPickerElement = (function () {
           })();
           class AuthorColorPickerElement extends AuthorSliderElement {
     constructor () {
-      super(`<template><style>@charset "UTF-8"; :host{contain:content;display:flex;flex-direction:column}:host *,:host :after,:host :before{box-sizing:border-box}:host .wrapper{position:relative;flex:1;display:flex;flex-direction:column}:host .canvas-wrapper{flex:1;display:flex;flex-direction:column}:host canvas{flex:1;display:block;width:100%;height:100%}:host ::slotted(*){position:absolute;z-index:1}author-color-picker{contain:content;display:flex;flex-direction:column}author-color-picker *,author-color-picker :after,author-color-picker :before{box-sizing:border-box}author-color-picker .wrapper{position:relative;flex:1;display:flex;flex-direction:column}author-color-picker .canvas-wrapper{flex:1;display:flex;flex-direction:column}author-color-picker canvas{flex:1;display:block;width:100%;height:100%}author-color-picker *{position:absolute;z-index:1}</style><div class="wrapper"><slot></slot><div class="canvas-wrapper"><canvas></canvas></div></div></template>`);
+      super(`<template><style>@charset "UTF-8"; :host{contain:content;display:flex;flex-direction:column}:host *,:host :after,:host :before{box-sizing:border-box}:host ::slotted(*){position:absolute;z-index:1}:host,:host([mode=single-hue]){background:linear-gradient(to bottom,transparent 0,#000 100%),linear-gradient(to right,#fff 0,transparent 100%)}:host([mode=all-hues]){background:linear-gradient(to right,red 0,#ff0 calc(1 / 6 * 100%),#0f0 calc(1 / 3 * 100%),#0ff 50%,#00f calc(2 / 3 * 100%),#f0f calc(5 / 6 * 100%),red 100%)}author-color-picker{contain:content;display:flex;flex-direction:column}author-color-picker *,author-color-picker :after,author-color-picker :before{box-sizing:border-box}author-color-picker *{position:absolute;z-index:1}author-color-picker,author-color-picker[mode=single-hue]{background:linear-gradient(to bottom,transparent 0,#000 100%),linear-gradient(to right,#fff 0,transparent 100%)}author-color-picker[mode=all-hues]{background:linear-gradient(to right,red 0,#ff0 calc(1 / 6 * 100%),#0f0 calc(1 / 3 * 100%),#0ff 50%,#00f calc(2 / 3 * 100%),#f0f calc(5 / 6 * 100%),red 100%)}</style><slot></slot></template>`);
 
       // Override AuthorSliderElement defaults
       this.PRIVATE.defaultAxis = '*';
@@ -112,28 +112,6 @@ var AuthorColorPickerElement = (function () {
         alpha: {
           private: true,
           default: 100
-        },
-
-        canvas: {
-          private: true,
-          readonly: true,
-          get: () => this.shadowRoot.querySelector('canvas')
-        },
-
-        context: {
-          private: true,
-          readonly: true,
-          get: () => this.PRIVATE.canvas.getContext('2d')
-        },
-
-        initialWidth: {
-          private: true,
-          default: 236
-        },
-
-        initialHeight: {
-          private: true,
-          default: 118
         }
       });
 
@@ -143,68 +121,19 @@ var AuthorColorPickerElement = (function () {
       });
 
       this.UTIL.definePrivateMethods({
-        drawSingleHueSpectrum: (hue, width, height) => {
-          let { context, HSVToRGB } = this.PRIVATE;
-          let rgb = HSVToRGB(hue, 100, 100);
-
-          context.clearRect(0, 0, width, height);
-          context.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 1)`;
-  				context.fillRect(0, 0, width, height);
-
-          let gradient = {
-            x: context.createLinearGradient(0, 0, width, 0),
-            y: context.createLinearGradient(0, 0, 0, height)
-          };
-
-          gradient.x.addColorStop(0, 'rgba(255, 255, 255, 1)');
-          gradient.x.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
-          context.fillStyle = gradient.x;
-          context.fillRect(0, 0, width, height);
-
-          gradient.y.addColorStop(0, 'rgba(0, 0, 0, 0)');
-          gradient.y.addColorStop(1, 'rgba(0, 0, 0, 1)');
-
-          context.fillStyle = gradient.y;
-          context.fillRect(0, 0, width, height);
-        },
-
-        drawAllHueSpectrum: (width, height, orientation = 'horizontal') => {
-          let { context } = this.PRIVATE;
-
-          // this.PRIVATE.hue = 0
-
-          let args = orientation === 'horizontal'
-            ? [0, 0, width, 0]
-            : [0, 0, 0, height];
-
-          let gradient = context.createLinearGradient(...args);
-
-          gradient.addColorStop(0 / 6, '#F00');
-          gradient.addColorStop(1 / 6, '#FF0');
-          gradient.addColorStop(2 / 6, '#0F0');
-          gradient.addColorStop(3 / 6, '#0FF');
-          gradient.addColorStop(4 / 6, '#00F');
-          gradient.addColorStop(5 / 6, '#F0F');
-          gradient.addColorStop(6 / 6, '#F00');
-
-          context.fillStyle = gradient;
-          context.fillRect(0, 0, width, height);
-        },
-
-        draw: (width = this.clientWidth, height = this.clientHeight, hue = this.PRIVATE.hue) => {
-          let { canvas, drawAllHueSpectrum, drawSingleHueSpectrum } = this.PRIVATE;
-
-          canvas.width = width;
-          canvas.height = height;
+        draw: () => {
+          let { handles, hue, HSVToRGB, saturation, value } = this.PRIVATE;
 
           switch (this.mode) {
-            case 'single-hue': return drawSingleHueSpectrum(hue, width, height)
-            case 'all-hues': return drawAllHueSpectrum(width, height)
+            case 'single-hue':
+              return this.UTIL.setStyleProperty('bgColorRule', 'background-color', `rgba(${HSVToRGB(hue, 100, 100).join(', ')}, 1)`)
+          }
 
-            default: this.UTIL.throwError({
-              message: `Invalid mode "${this.mode}"`
-            });
+          if (handles.length === 1) {
+            handles.item(0).position = {
+              x: { pct: saturation / 100 },
+              y: { pct: 1 - (value / 100) }
+            };
           }
         },
 
@@ -217,10 +146,13 @@ var AuthorColorPickerElement = (function () {
           let b = rgb[2];
 
           return {
+            hue: this.PRIVATE.hue,
+            saturation: this.PRIVATE.saturation,
+            value: this.PRIVATE.value,
             r,
             g,
             b,
-            a: alpha,
+            alpha,
             hex: `#${this.PRIVATE.RGBToHex(...rgb)}`,
             rgba: `rgba(${rgb.join(',')},${alpha / 100})`
           }
@@ -399,13 +331,6 @@ var AuthorColorPickerElement = (function () {
 
           this.PRIVATE.draw();
 
-          if (handles.length === 1) {
-            handles.item(0).position = {
-              x: { pct: hsv[1] },
-              y: { pct: 1 - hsv[2] }
-            };
-          }
-
           this.emit('change', {
             color: generateColorObject(),
             position: generatePositionObject()
@@ -440,24 +365,20 @@ var AuthorColorPickerElement = (function () {
         },
 
         connected: () => {
+          // Remove default author-slider pointerdown handler
+          this.removeEventListener('pointerdown', this.PRIVATE.pointerdownHandler);
+
           // Reset AuthorSliderElement defaults
           if (!this.hasAttribute('axis')) {
             this.axis = this.PRIVATE.defaultAxis;
           }
 
-          this.removeEventListener('pointerdown', this.PRIVATE.pointerdownHandler);
+          this.UTIL.insertStyleRules({
+            bgColorRule: ':host {}'
+          });
 
-          let { draw, initialWidth, initialHeight } = this.PRIVATE;
-          draw(initialWidth, initialHeight);
+          this.PRIVATE.draw();
         },
-
-        // pointerenter: evt => {
-        //   let { draw, initialWidth, initialHeight } = this.PRIVATE
-        //
-        //   if (initialWidth !== this.clientWidth || initialHeight !== this.clientHeight) {
-        //     draw()
-        //   }
-        // },
 
         pointerdown: evt => {
           this.PRIVATE.position = this.PRIVATE.getRelativePosition(evt);

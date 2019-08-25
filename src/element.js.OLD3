@@ -95,6 +95,28 @@ class AuthorColorPickerElement extends AuthorSliderElement {
       alpha: {
         private: true,
         default: 100
+      },
+
+      canvas: {
+        private: true,
+        readonly: true,
+        get: () => this.shadowRoot.querySelector('canvas')
+      },
+
+      context: {
+        private: true,
+        readonly: true,
+        get: () => this.PRIVATE.canvas.getContext('2d')
+      },
+
+      initialWidth: {
+        private: true,
+        default: 236
+      },
+
+      initialHeight: {
+        private: true,
+        default: 118
       }
     })
 
@@ -104,19 +126,71 @@ class AuthorColorPickerElement extends AuthorSliderElement {
     })
 
     this.UTIL.definePrivateMethods({
-      draw: () => {
-        let { handles, hue, HSVToRGB, saturation, value } = this.PRIVATE
+      drawSingleHueSpectrum: (hue, width, height) => {
+        // linear-gradient(to bottom, transparent 0%, #000 100%),
+        // linear-gradient(to right, #FFF 0%, #FF0000 100%)
 
-        switch (this.mode) {
-          case 'single-hue':
-            return this.UTIL.setStyleProperty('bgColorRule', 'background-color', `rgba(${HSVToRGB(hue, 100, 100).join(', ')}, 1)`)
+        let { context, HSVToRGB } = this.PRIVATE
+        let rgb = HSVToRGB(hue, 100, 100)
+
+        context.clearRect(0, 0, width, height)
+        context.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 1)`
+				context.fillRect(0, 0, width, height)
+
+        let gradient = {
+          x: context.createLinearGradient(0, 0, width, 0),
+          y: context.createLinearGradient(0, 0, 0, height)
         }
 
-        if (handles.length === 1) {
-          handles.item(0).position = {
-            x: { pct: saturation / 100 },
-            y: { pct: 1 - (value / 100) }
-          }
+        gradient.x.addColorStop(0, 'rgba(255, 255, 255, 1)')
+        gradient.x.addColorStop(1, 'rgba(255, 255, 255, 0)')
+
+        context.fillStyle = gradient.x
+        context.fillRect(0, 0, width, height)
+
+        gradient.y.addColorStop(0, 'rgba(0, 0, 0, 0)')
+        gradient.y.addColorStop(1, 'rgba(0, 0, 0, 1)')
+
+        context.fillStyle = gradient.y
+        context.fillRect(0, 0, width, height)
+      },
+
+      drawAllHueSpectrum: (width, height, orientation = 'horizontal') => {
+        let { context } = this.PRIVATE
+
+        // this.PRIVATE.hue = 0
+
+        let args = orientation === 'horizontal'
+          ? [0, 0, width, 0]
+          : [0, 0, 0, height]
+
+        let gradient = context.createLinearGradient(...args)
+
+        gradient.addColorStop(0 / 6, '#F00')
+        gradient.addColorStop(1 / 6, '#FF0')
+        gradient.addColorStop(2 / 6, '#0F0')
+        gradient.addColorStop(3 / 6, '#0FF')
+        gradient.addColorStop(4 / 6, '#00F')
+        gradient.addColorStop(5 / 6, '#F0F')
+        gradient.addColorStop(6 / 6, '#F00')
+
+        context.fillStyle = gradient
+        context.fillRect(0, 0, width, height)
+      },
+
+      draw: (width = this.clientWidth, height = this.clientHeight, hue = this.PRIVATE.hue) => {
+        let { canvas, drawAllHueSpectrum, drawSingleHueSpectrum } = this.PRIVATE
+
+        canvas.width = width
+        canvas.height = height
+
+        switch (this.mode) {
+          case 'single-hue': return drawSingleHueSpectrum(hue, width, height)
+          case 'all-hues': return drawAllHueSpectrum(width, height)
+
+          default: this.UTIL.throwError({
+            message: `Invalid mode "${this.mode}"`
+          })
         }
       },
 
@@ -129,13 +203,10 @@ class AuthorColorPickerElement extends AuthorSliderElement {
         let b = rgb[2]
 
         return {
-          hue: this.PRIVATE.hue,
-          saturation: this.PRIVATE.saturation,
-          value: this.PRIVATE.value,
           r,
           g,
           b,
-          alpha,
+          a: alpha,
           hex: `#${this.PRIVATE.RGBToHex(...rgb)}`,
           rgba: `rgba(${rgb.join(',')},${alpha / 100})`
         }
@@ -315,6 +386,13 @@ class AuthorColorPickerElement extends AuthorSliderElement {
 
         this.PRIVATE.draw()
 
+        if (handles.length === 1) {
+          handles.item(0).position = {
+            x: { pct: hsv[1] },
+            y: { pct: 1 - hsv[2] }
+          }
+        }
+
         this.emit('change', {
           color: generateColorObject(),
           position: generatePositionObject()
@@ -349,20 +427,24 @@ class AuthorColorPickerElement extends AuthorSliderElement {
       },
 
       connected: () => {
-        // Remove default author-slider pointerdown handler
-        this.removeEventListener('pointerdown', this.PRIVATE.pointerdownHandler)
-
         // Reset AuthorSliderElement defaults
         if (!this.hasAttribute('axis')) {
           this.axis = this.PRIVATE.defaultAxis
         }
 
-        this.UTIL.insertStyleRules({
-          bgColorRule: ':host {}'
-        })
+        this.removeEventListener('pointerdown', this.PRIVATE.pointerdownHandler)
 
-        this.PRIVATE.draw()
+        let { draw, initialWidth, initialHeight } = this.PRIVATE
+        draw(initialWidth, initialHeight)
       },
+
+      // pointerenter: evt => {
+      //   let { draw, initialWidth, initialHeight } = this.PRIVATE
+      //
+      //   if (initialWidth !== this.clientWidth || initialHeight !== this.clientHeight) {
+      //     draw()
+      //   }
+      // },
 
       pointerdown: evt => {
         this.PRIVATE.position = this.PRIVATE.getRelativePosition(evt)
