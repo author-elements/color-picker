@@ -209,6 +209,18 @@ class AuthorColorPickerElement extends AuthorSliderElement {
         }
       },
 
+      hexToRGB: hex => {
+        let [ , short, long ] = String(hex).match(/^#?(?:([\da-f]{3})[\da-f]?|([\da-f]{6})(?:[\da-f]{2})?)$/i) || []
+        let rgb
+
+        if (short) {
+          return Array.from(short, s => Number.parseInt(s, 16)).map(n => (n << 4) | n)
+        }
+
+        let value = Number.parseInt(long, 16)
+        return [ value >> 16, value >> 8 & 0xFF, value & 0xFF ]
+      },
+
       HSVToRGB: (h, s, v) => {
         let r, g, b, i, f, p, q, t
 
@@ -359,6 +371,29 @@ class AuthorColorPickerElement extends AuthorSliderElement {
             this.PRIVATE.value = 100
             break
         }
+      },
+
+      setRGB: (r, g, b) => {
+        let { generateColorObject, generatePositionObject, handles, RGBToHSV } = this.PRIVATE
+        let hsv = RGBToHSV(r, g, b)
+
+        this.PRIVATE.hue = hsv[0] * 360
+        this.PRIVATE.saturation = hsv[1] * 100
+        this.PRIVATE.value = hsv[2] * 100
+
+        this.PRIVATE.draw()
+
+        if (handles.length === 1) {
+          handles.item(0).position = {
+            x: { pct: hsv[1] },
+            y: { pct: 1 - hsv[2] }
+          }
+        }
+
+        this.emit('change', {
+          color: generateColorObject(),
+          position: generatePositionObject()
+        })
       }
     })
 
@@ -487,43 +522,17 @@ class AuthorColorPickerElement extends AuthorSliderElement {
   //   console.log(val);
   // }
 
-  set rgb ({r, g, b}) {
-    let {
-      generateColorObject,
-      generatePositionObject,
-      handles,
-      RGBToHSV,
-      setColor
-    } = this.PRIVATE
-
-    let hsv = RGBToHSV(r, g, b)
-
-    this.PRIVATE.hue = hsv[0] * 360
-    this.PRIVATE.saturation = hsv[1] * 100
-    this.PRIVATE.value = hsv[2] * 100
-
-    this.PRIVATE.draw()
-
-    if (handles.length === 1) {
-      handles.item(0).position = {
-        x: { pct: hsv[1] },
-        y: { pct: 1 - hsv[2] }
-      }
-    }
-
-    this.emit('change', {
-      color: generateColorObject(),
-      position: generatePositionObject()
-    })
+  set rgb ({r = 0, g = 0, b = 0}) {
+    this.PRIVATE.setRGB(r, g, b)
   }
 
   // get hex () {
   //
   // }
 
-  // set hex (val) {
-  //   console.log(val);
-  // }
+  set hex (val) {
+    this.PRIVATE.setRGB(...this.PRIVATE.hexToRGB(val))
+  }
 
   // set alpha (val) {
   //   console.log(val)

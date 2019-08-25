@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.0.8 available at github.com/author-elements/color-picker
-// Last Build: 8/24/2019, 10:41:26 PM
+// @author.io/element-color-picker v1.0.9 available at github.com/author-elements/color-picker
+// Last Build: 8/24/2019, 11:23:00 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -73,6 +73,10 @@ var AuthorColorPickerElement = (function () {
     return _assertThisInitialized(self);
   }
 
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+  }
+
   function _toConsumableArray(arr) {
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
   }
@@ -85,12 +89,46 @@ var AuthorColorPickerElement = (function () {
     }
   }
 
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
   function _iterableToArray(iter) {
     if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
   }
 
+  function _iterableToArrayLimit(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
   function _nonIterableSpread() {
     throw new TypeError("Invalid attempt to spread non-iterable instance");
+  }
+
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance");
   }
 
   if (!window.hasOwnProperty('AuthorBaseElement')) {
@@ -334,6 +372,23 @@ var AuthorColorPickerElement = (function () {
             rgba: "rgba(".concat(rgb.join(','), ",").concat(alpha / 100, ")")
           };
         },
+        hexToRGB: function hexToRGB(hex) {
+          var _ref = String(hex).match(/^#?(?:([\da-f]{3})[\da-f]?|([\da-f]{6})(?:[\da-f]{2})?)$/i) || [],
+              _ref2 = _slicedToArray(_ref, 3),
+              short = _ref2[1],
+              long = _ref2[2];
+
+          if (short) {
+            return Array.from(short, function (s) {
+              return Number.parseInt(s, 16);
+            }).map(function (n) {
+              return n << 4 | n;
+            });
+          }
+
+          var value = Number.parseInt(long, 16);
+          return [value >> 16, value >> 8 & 0xFF, value & 0xFF];
+        },
         HSVToRGB: function HSVToRGB(h, s, v) {
           var r, g, b, i, f, p, q, t;
           h = Math.max(0, Math.min(360, h));
@@ -467,6 +522,35 @@ var AuthorColorPickerElement = (function () {
               _this.PRIVATE.value = 100;
               break;
           }
+        },
+        setRGB: function setRGB(r, g, b) {
+          var _this$PRIVATE7 = _this.PRIVATE,
+              generateColorObject = _this$PRIVATE7.generateColorObject,
+              generatePositionObject = _this$PRIVATE7.generatePositionObject,
+              handles = _this$PRIVATE7.handles,
+              RGBToHSV = _this$PRIVATE7.RGBToHSV;
+          var hsv = RGBToHSV(r, g, b);
+          _this.PRIVATE.hue = hsv[0] * 360;
+          _this.PRIVATE.saturation = hsv[1] * 100;
+          _this.PRIVATE.value = hsv[2] * 100;
+
+          _this.PRIVATE.draw();
+
+          if (handles.length === 1) {
+            handles.item(0).position = {
+              x: {
+                pct: hsv[1]
+              },
+              y: {
+                pct: 1 - hsv[2]
+              }
+            };
+          }
+
+          _this.emit('change', {
+            color: generateColorObject(),
+            position: generatePositionObject()
+          });
         }
       });
 
@@ -481,9 +565,9 @@ var AuthorColorPickerElement = (function () {
             return;
           }
 
-          var _this$PRIVATE7 = _this.PRIVATE,
-              defaultMode = _this$PRIVATE7.defaultMode,
-              validModes = _this$PRIVATE7.validModes;
+          var _this$PRIVATE8 = _this.PRIVATE,
+              defaultMode = _this$PRIVATE8.defaultMode,
+              validModes = _this$PRIVATE8.validModes;
 
           switch (attribute) {
             case 'mode':
@@ -510,10 +594,10 @@ var AuthorColorPickerElement = (function () {
 
           _this.removeEventListener('pointerdown', _this.PRIVATE.pointerdownHandler);
 
-          var _this$PRIVATE8 = _this.PRIVATE,
-              draw = _this$PRIVATE8.draw,
-              initialWidth = _this$PRIVATE8.initialWidth,
-              initialHeight = _this$PRIVATE8.initialHeight;
+          var _this$PRIVATE9 = _this.PRIVATE,
+              draw = _this$PRIVATE9.draw,
+              initialWidth = _this$PRIVATE9.initialWidth,
+              initialHeight = _this$PRIVATE9.initialHeight;
           draw(initialWidth, initialHeight);
         },
         // pointerenter: evt => {
@@ -526,14 +610,14 @@ var AuthorColorPickerElement = (function () {
         pointerdown: function pointerdown(evt) {
           _this.PRIVATE.position = _this.PRIVATE.getRelativePosition(evt);
           var getPercentageDecimal = _this.UTIL.getPercentageDecimal;
-          var _this$PRIVATE9 = _this.PRIVATE,
-              generateColorObject = _this$PRIVATE9.generateColorObject,
-              generatePositionObject = _this$PRIVATE9.generatePositionObject,
-              handles = _this$PRIVATE9.handles,
-              HSVToRGB = _this$PRIVATE9.HSVToRGB,
-              hue = _this$PRIVATE9.hue,
-              pointermoveHandler = _this$PRIVATE9.pointermoveHandler,
-              position = _this$PRIVATE9.position;
+          var _this$PRIVATE10 = _this.PRIVATE,
+              generateColorObject = _this$PRIVATE10.generateColorObject,
+              generatePositionObject = _this$PRIVATE10.generatePositionObject,
+              handles = _this$PRIVATE10.handles,
+              HSVToRGB = _this$PRIVATE10.HSVToRGB,
+              hue = _this$PRIVATE10.hue,
+              pointermoveHandler = _this$PRIVATE10.pointermoveHandler,
+              position = _this$PRIVATE10.position;
 
           if (handles.length > 1) {
             return;
@@ -599,44 +683,25 @@ var AuthorColorPickerElement = (function () {
 
     }, {
       key: "rgb",
-      set: function set(_ref) {
-        var r = _ref.r,
-            g = _ref.g,
-            b = _ref.b;
-        var _this$PRIVATE10 = this.PRIVATE,
-            generateColorObject = _this$PRIVATE10.generateColorObject,
-            generatePositionObject = _this$PRIVATE10.generatePositionObject,
-            handles = _this$PRIVATE10.handles,
-            RGBToHSV = _this$PRIVATE10.RGBToHSV,
-            setColor = _this$PRIVATE10.setColor;
-        var hsv = RGBToHSV(r, g, b);
-        this.PRIVATE.hue = hsv[0] * 360;
-        this.PRIVATE.saturation = hsv[1] * 100;
-        this.PRIVATE.value = hsv[2] * 100;
-        this.PRIVATE.draw();
-
-        if (handles.length === 1) {
-          handles.item(0).position = {
-            x: {
-              pct: hsv[1]
-            },
-            y: {
-              pct: 1 - hsv[2]
-            }
-          };
-        }
-
-        this.emit('change', {
-          color: generateColorObject(),
-          position: generatePositionObject()
-        });
+      set: function set(_ref3) {
+        var _ref3$r = _ref3.r,
+            r = _ref3$r === void 0 ? 0 : _ref3$r,
+            _ref3$g = _ref3.g,
+            g = _ref3$g === void 0 ? 0 : _ref3$g,
+            _ref3$b = _ref3.b,
+            b = _ref3$b === void 0 ? 0 : _ref3$b;
+        this.PRIVATE.setRGB(r, g, b);
       } // get hex () {
       //
       // }
-      // set hex (val) {
-      //   console.log(val);
-      // }
-      // set alpha (val) {
+
+    }, {
+      key: "hex",
+      set: function set(val) {
+        var _this$PRIVATE11;
+
+        (_this$PRIVATE11 = this.PRIVATE).setRGB.apply(_this$PRIVATE11, _toConsumableArray(this.PRIVATE.hexToRGB(val)));
+      } // set alpha (val) {
       //   console.log(val)
       // }
 
