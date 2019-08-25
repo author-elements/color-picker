@@ -25,7 +25,7 @@
     "@author.io/element-options": "^1.1.3",
     "@author.io/element-select": "^1.0.12",
     "@author.io/element-selected-options": "^1.0.2",
-    "@author.io/element-slider": "^1.0.6",
+    "@author.io/element-slider": "^1.0.7",
     "@author.io/element-slider-handle": "^1.0.3"
   }
 }

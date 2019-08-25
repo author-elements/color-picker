@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-slider v1.0.6 available at github.com/author-elements/slider
-// Last Build: 8/7/2019, 1:47:19 AM
+// @author.io/element-slider v1.0.7 available at github.com/author-elements/slider
+// Last Build: 8/7/2019, 4:02:32 AM
 var AuthorSliderElement = (function () {
   'use strict';
 
@@ -193,10 +193,12 @@ var AuthorSliderElement = (function () {
           });
         },
         getRelativePosition: function getRelativePosition(evt) {
+          var dims = _this.getBoundingClientRect();
+
           return _this.PRIVATE.generateCoordinates(function () {
-            return Math.min(Math.max(evt.pageX - _this.offsetLeft, 0), _this.clientWidth);
+            return Math.min(Math.max(evt.pageX - dims.left - window.scrollX, 0), _this.clientWidth);
           }, function () {
-            return Math.min(Math.max(evt.pageY - _this.offsetTop, 0), _this.clientHeight);
+            return Math.min(Math.max(evt.pageY - dims.top - window.scrollY, 0), _this.clientHeight);
           });
         },
         pointerdownHandler: function pointerdownHandler(evt) {

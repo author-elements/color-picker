@@ -1,6 +1,6 @@
 /**
- * author-color-picker-showroom v1.0.0 generated on Tue Aug 06 2019.
- * Built at 20:07:48 GMT-0700 (Pacific Daylight Time)
+ * author-color-picker-showroom v1.0.0 generated on Sat Aug 24 2019.
+ * Built at 22:41:30 GMT-0700 (Pacific Daylight Time)
  * Copyright (c) 2019 Author.io
  */
 "use strict";var Demo=new NGNX.VIEW.Registry({selector:".demo",namespace:"demo.",events:{"all-hue-picker":{change:function(e){return Demo.emit("single-hue-picker.change",e)},slide:function(e){return Demo.emit("single-hue-picker.change",e)}}}}),SingleHuePicker=new NGNX.VIEW.Registry({parent:Demo,selector:".single-hue.picker",namespace:"single-hue-picker.",references:{picker:"author-color-picker",selectedSwatch:".swatch .selected.color",previewSwatch:".swatch .color.preview"},events:{change:function(e){return SingleHuePicker.ref.picker.element.hue=e}},init:function(){var e=this.ref,c=e.picker,i=e.previewSwatch,t=e.selectedSwatch;window.cp1=c.element,c.on("slide",function(e){var c=e.detail,r=c.color;c.position;i.style.background=r.rgba}),c.on("change",function(e){var c=e.detail,r=c.color;c.position;i.style.background=r.rgba,t.style.background=r.rgba})}}),AllHuePicker=new NGNX.VIEW.Registry({parent:Demo,selector:".all-hue.picker",namespace:"all-hue-picker.",references:{picker:"author-color-picker",selectedSwatch:".selected.color",previewSwatch:".color.preview"},init:function(){var i=this,e=this.ref,t=e.picker,n=e.previewSwatch,o=e.selectedSwatch;window.cp2=t.element,t.on("slide",function(e){var c=e.detail,r=c.color;c.position;n.style.background=r.rgba,i.emit("slide",t.element.hue)}),t.on("change",function(e){var c=e.detail,r=c.color;c.position;n.style.background=r.rgba,o.style.background=r.rgba,i.emit("change",t.element.hue)})}});

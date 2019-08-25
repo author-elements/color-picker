@@ -12,17 +12,19 @@ class AuthorColorPickerElement extends AuthorSliderElement {
       // this.PRIVATE.previousColor = this.PRIVATE.selectedColor
       // this.PRIVATE.selectedColor = currentColor
 
+      let position = null
+
       if (handles.length > 1) {
         reposition = false
       } else if (handles.length !== 0) {
-        handles.item(0).position = generatePositionObject()
+        handles.item(0).position = position = generatePositionObject()
       }
 
       if (reposition) {
         this.emit('change', {
           // previous: this.previousColor,
           color: generateColorObject(),
-          position: generatePositionObject()
+          position: position || generatePositionObject()
         })
       }
 
@@ -278,6 +280,52 @@ class AuthorColorPickerElement extends AuthorSliderElement {
         ]
       },
 
+      /**
+       * Converts an RGB color value to HSV. Conversion formula
+       * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+       * Assumes r, g, and b are contained in the set [0, 255] and
+       * returns h, s, and v in the set [0, 1].
+       *
+       * @param   Number  r       The red color value
+       * @param   Number  g       The green color value
+       * @param   Number  b       The blue color value
+       * @return  Array           The HSV representation
+       */
+      RGBToHSV: (red, green, blue) => {
+        red /= 255
+        green /= 255
+        blue /= 255
+
+        let max = Math.max(red, green, blue)
+        let min = Math.min(red, green, blue)
+        let hue, saturation, value = max
+
+        let difference = max - min
+        saturation = max === 0 ? 0 : difference / max
+
+        if (max === min) {
+          hue = 0
+        } else {
+          switch (max) {
+            case red:
+              hue = (green - blue) / difference + (green < blue ? 6 : 0)
+              break
+
+            case green:
+              hue = (blue - red) / difference + 2
+              break
+
+            case blue:
+              hue = (red - green) / difference + 4
+              break
+          }
+
+          hue /= 6
+        }
+
+        return [hue, saturation, value]
+      },
+
       RGBToHex: (r, g, b) => {
         let { unitToHex } = this.PRIVATE
         return `${unitToHex(r)}${unitToHex(g)}${unitToHex(b)}`
@@ -293,7 +341,7 @@ class AuthorColorPickerElement extends AuthorSliderElement {
         return hex.toUpperCase()
       },
 
-      setColor: position => {
+      setColor: (position, percentage = false) => {
         let { getPercentageDecimal } = this.UTIL
 
         switch (this.mode) {
@@ -439,9 +487,35 @@ class AuthorColorPickerElement extends AuthorSliderElement {
   //   console.log(val);
   // }
 
-  // set rgb ({ r, g, b }) {
-  //   console.log(r, g, b)
-  // }
+  set rgb ({r, g, b}) {
+    let {
+      generateColorObject,
+      generatePositionObject,
+      handles,
+      RGBToHSV,
+      setColor
+    } = this.PRIVATE
+
+    let hsv = RGBToHSV(r, g, b)
+
+    this.PRIVATE.hue = hsv[0] * 360
+    this.PRIVATE.saturation = hsv[1] * 100
+    this.PRIVATE.value = hsv[2] * 100
+
+    this.PRIVATE.draw()
+
+    if (handles.length === 1) {
+      handles.item(0).position = {
+        x: { pct: hsv[1] },
+        y: { pct: 1 - hsv[2] }
+      }
+    }
+
+    this.emit('change', {
+      color: generateColorObject(),
+      position: generatePositionObject()
+    })
+  }
 
   // get hex () {
   //

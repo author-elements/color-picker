@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-slider v1.0.6 available at github.com/author-elements/slider
-// Last Build: 8/7/2019, 1:47:19 AM
+// @author.io/element-slider v1.0.7 available at github.com/author-elements/slider
+// Last Build: 8/7/2019, 4:02:32 AM
 var AuthorSliderElement = (function () {
   'use strict';
 
@@ -101,10 +101,12 @@ var AuthorSliderElement = (function () {
         })),
 
         getRelativePosition: evt => {
+          let dims = this.getBoundingClientRect();
+
           return this.PRIVATE.generateCoordinates(() => {
-            return Math.min(Math.max(evt.pageX - this.offsetLeft, 0), this.clientWidth)
+            return Math.min(Math.max(evt.pageX - dims.left - window.scrollX, 0), this.clientWidth)
           }, () => {
-            return Math.min(Math.max(evt.pageY - this.offsetTop, 0), this.clientHeight)
+            return Math.min(Math.max(evt.pageY - dims.top - window.scrollY, 0), this.clientHeight)
           })
         },
 
