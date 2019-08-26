@@ -10,26 +10,18 @@
   box-sizing: border-box;
 }
 
-/* :host .wrapper {
-  position: relative;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-} */
-
 :host ::slotted(*) {
   position: absolute;
   z-index: 1;
 }
 
-:host,
-:host([mode="single-hue"]) {
-  background:
+:host {
+  background-image:
     linear-gradient(to bottom, transparent 0, black 100%),
     linear-gradient(to right, white 0, transparent 100%)
   ;
 }
 
-:host([mode="all-hues"]) {
-  background: linear-gradient(to right, #F00 0%, #FF0 calc(1 / 6 * 100%), #0F0 calc(1 / 3 * 100%), #0FF 50%, #00F calc(2 / 3 * 100%), #F0F calc(5 / 6 * 100%), #F00 100%);
+:host([mode="hue"]) {
+  background-image: linear-gradient(to right, #F00 0%, #FF0 calc(1 / 6 * 100%), #0F0 calc(1 / 3 * 100%), #0FF 50%, #00F calc(2 / 3 * 100%), #F0F calc(5 / 6 * 100%), #F00 100%);
 }

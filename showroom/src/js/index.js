@@ -39,6 +39,7 @@ const SingleHuePicker = new NGNX.VIEW.Registry({
     })
 
     picker.on('change', evt => {
+      console.log('change');
       let { color, position } = evt.detail
       previewSwatch.style.background = color.rgba
       selectedSwatch.style.background = color.rgba
@@ -82,7 +83,7 @@ const AllHuePicker = new NGNX.VIEW.Registry({
       previewSwatch.style.background = color.rgba
       selectedSwatch.style.background = color.rgba
 
-      this.emit('change', picker.element.hue)
+      // this.emit('change', picker.element.hue)
     })
   }
 })
