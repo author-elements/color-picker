@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.0.10 available at github.com/author-elements/color-picker
-// Last Build: 8/25/2019, 4:45:02 PM
+// @author.io/element-color-picker v1.1.0 available at github.com/author-elements/color-picker
+// Last Build: 8/25/2019, 5:22:36 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
