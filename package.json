@@ -1,6 +1,6 @@
 {
   "name": "@author.io/element-color-picker",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "author-color-picker custom element (web component).",
   "main": "dist/author-color-picker.min.js",
   "scripts": {
