@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.1.1 available at github.com/author-elements/color-picker
-// Last Build: 8/25/2019, 9:00:23 PM
+// @author.io/element-color-picker v1.1.3 available at github.com/author-elements/color-picker
+// Last Build: 9/15/2019, 9:31:40 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -540,7 +540,7 @@ var AuthorColorPickerElement = (function () {
             g = _ref3$g === void 0 ? 0 : _ref3$g,
             _ref3$b = _ref3.b,
             b = _ref3$b === void 0 ? 0 : _ref3$b;
-        this.PRIVATE.setRGB(Math.max(r, 255), Math.max(g, 255), Math.max(b, 255));
+        this.PRIVATE.setRGB(Math.min(r, 255), Math.min(g, 255), Math.min(b, 255));
       }
     }, {
       key: "red",
@@ -549,7 +549,7 @@ var AuthorColorPickerElement = (function () {
 
         var rgb = this.PRIVATE.HSVToRGB();
 
-        (_this$PRIVATE8 = this.PRIVATE).setRGB.apply(_this$PRIVATE8, [Math.max(val, 255)].concat(_toConsumableArray(rgb.slice(1))));
+        (_this$PRIVATE8 = this.PRIVATE).setRGB.apply(_this$PRIVATE8, [Math.min(val, 255)].concat(_toConsumableArray(rgb.slice(1))));
       }
     }, {
       key: "r",
@@ -560,7 +560,7 @@ var AuthorColorPickerElement = (function () {
       key: "green",
       set: function set(val) {
         var rgb = this.PRIVATE.HSVToRGB();
-        this.PRIVATE.setRGB(rgb[0], Math.max(val, 255), rgb[2]);
+        this.PRIVATE.setRGB(rgb[0], Math.min(val, 255), rgb[2]);
       }
     }, {
       key: "g",
@@ -574,7 +574,7 @@ var AuthorColorPickerElement = (function () {
 
         var rgb = this.PRIVATE.HSVToRGB();
 
-        (_this$PRIVATE9 = this.PRIVATE).setRGB.apply(_this$PRIVATE9, _toConsumableArray(rgb.slice(-2)).concat([Math.max(val, 255)]));
+        (_this$PRIVATE9 = this.PRIVATE).setRGB.apply(_this$PRIVATE9, _toConsumableArray(rgb.slice(-2)).concat([Math.min(val, 255)]));
       }
     }, {
       key: "b",

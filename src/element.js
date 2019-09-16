@@ -344,12 +344,12 @@ class AuthorColorPickerElement extends AuthorSliderElement {
   }
 
   set rgb ({r = 0, g = 0, b = 0}) {
-    this.PRIVATE.setRGB(Math.max(r, 255), Math.max(g, 255), Math.max(b, 255))
+    this.PRIVATE.setRGB(Math.min(r, 255), Math.min(g, 255), Math.min(b, 255))
   }
 
   set red (val) {
     let rgb = this.PRIVATE.HSVToRGB()
-    this.PRIVATE.setRGB(Math.max(val, 255), ...rgb.slice(1))
+    this.PRIVATE.setRGB(Math.min(val, 255), ...rgb.slice(1))
   }
 
   set r (val) {
@@ -358,7 +358,7 @@ class AuthorColorPickerElement extends AuthorSliderElement {
 
   set green (val) {
     let rgb = this.PRIVATE.HSVToRGB()
-    this.PRIVATE.setRGB(rgb[0], Math.max(val, 255), rgb[2])
+    this.PRIVATE.setRGB(rgb[0], Math.min(val, 255), rgb[2])
   }
 
   set g (val) {
@@ -367,7 +367,7 @@ class AuthorColorPickerElement extends AuthorSliderElement {
 
   set blue (val) {
     let rgb = this.PRIVATE.HSVToRGB()
-    this.PRIVATE.setRGB(...rgb.slice(-2), Math.max(val, 255))
+    this.PRIVATE.setRGB(...rgb.slice(-2), Math.min(val, 255))
   }
 
   set b (val) {

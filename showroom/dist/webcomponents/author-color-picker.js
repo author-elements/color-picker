@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Author.io. MIT licensed.
-// @author.io/element-color-picker v1.1.1 available at github.com/author-elements/color-picker
-// Last Build: 8/25/2019, 9:00:23 PM
+// @author.io/element-color-picker v1.1.3 available at github.com/author-elements/color-picker
+// Last Build: 9/15/2019, 9:31:40 PM
 var AuthorColorPickerElement = (function () {
   'use strict';
 
@@ -360,12 +360,12 @@ var AuthorColorPickerElement = (function () {
     }
 
     set rgb ({r = 0, g = 0, b = 0}) {
-      this.PRIVATE.setRGB(Math.max(r, 255), Math.max(g, 255), Math.max(b, 255));
+      this.PRIVATE.setRGB(Math.min(r, 255), Math.min(g, 255), Math.min(b, 255));
     }
 
     set red (val) {
       let rgb = this.PRIVATE.HSVToRGB();
-      this.PRIVATE.setRGB(Math.max(val, 255), ...rgb.slice(1));
+      this.PRIVATE.setRGB(Math.min(val, 255), ...rgb.slice(1));
     }
 
     set r (val) {
@@ -374,7 +374,7 @@ var AuthorColorPickerElement = (function () {
 
     set green (val) {
       let rgb = this.PRIVATE.HSVToRGB();
-      this.PRIVATE.setRGB(rgb[0], Math.max(val, 255), rgb[2]);
+      this.PRIVATE.setRGB(rgb[0], Math.min(val, 255), rgb[2]);
     }
 
     set g (val) {
@@ -383,7 +383,7 @@ var AuthorColorPickerElement = (function () {
 
     set blue (val) {
       let rgb = this.PRIVATE.HSVToRGB();
-      this.PRIVATE.setRGB(...rgb.slice(-2), Math.max(val, 255));
+      this.PRIVATE.setRGB(...rgb.slice(-2), Math.min(val, 255));
     }
 
     set b (val) {
