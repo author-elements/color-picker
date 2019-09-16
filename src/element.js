@@ -329,6 +329,10 @@ class AuthorColorPickerElement extends AuthorSliderElement {
     return this.PRIVATE.generatePositionObject()
   }
 
+  get selectedColor () {
+    return this.PRIVATE.generateColorObject()
+  }
+
   get hue () {
     return this.PRIVATE.hue
   }
